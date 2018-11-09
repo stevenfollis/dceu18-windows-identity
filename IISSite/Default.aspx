@@ -108,8 +108,8 @@
                                     <div class="card-body">
                                         <asp:DataGrid ID="userGroupsGrid" runat="server" AutoGenerateColumns="false" CssClass="table table-striped table-bordered table-condensed table-responsive">
                                             <Columns>
-                                                <asp:BoundColumn DataField="Key" HeaderText="Group Name"></asp:BoundColumn>
-                                                <asp:BoundColumn DataField="Value" HeaderText="Value"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="Name" HeaderText="Name"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="DisplayName" HeaderText="Display Name"></asp:BoundColumn>
                                             </Columns>
                                         </asp:DataGrid>
                                     </div>
@@ -135,8 +135,10 @@
                                         <div class="card">
                                             <div class="card-body">
                                                 <asp:Panel ID="sqlResults" runat="server" Visible="false">
-                                                    <p>Testing Connection to database using connection String:
-                                                        <asp:Label ID="dbConnString" runat="server"></asp:Label></p>
+                                                    <p>
+                                                        Testing Connection to database using connection String:
+                                                        <asp:Label ID="dbConnString" runat="server"></asp:Label>
+                                                    </p>
                                                     <asp:DataGrid ID="sqlDataGrid" AutoGenerateColumns="true" runat="server" CssClass="table table-striped table-bordered table-condensed table-responsive">
                                                     </asp:DataGrid>
                                                 </asp:Panel>
@@ -183,119 +185,122 @@
                             <div class="tab-pane fade" id="pills-fileshare" role="tabpanel" aria-labelledby="pills-fileshare-tab">
                                 <div class="card">
                                     <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="ms-core-pageTitle">Browse File Shares</div>
-                                                <p>
-                                                    <span class="lead">File share server name: \\</span>
-                                                    <asp:TextBox ID="currentBrowseServer" CssClass="ms-uppercase" runat="server"></asp:TextBox>
-                                                    \<span class="lead">File share:</span><asp:TextBox ID="currentBrowseFolder" CssClass="ms-uppercase" runat="server"></asp:TextBox>
-                                                    <br />
-                                                    <span class="lead">Browsing as: <strong>
-                                                        <asp:LoginName ID="fileShareloginName" CssClass="ms-uppercase" runat="server" />
-                                                    </strong></span>
-                                                    <br />
-                                                </p>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <asp:Repeater ID="fileShareList" runat="server" OnItemDataBound="fileShareList_ItemDataBound">
-                                                    <HeaderTemplate>
-                                                        <h3 class="ms-webpart-titleText">Chose a file share to browse</h3>
-                                                        <div class="list-group">
-                                                    </HeaderTemplate>
-                                                    <ItemTemplate>
-                                                        <asp:HyperLink ID="fileShareUrl" CssClass="list-group-item" runat="server"></asp:HyperLink>
-                                                    </ItemTemplate>
-                                                    <FooterTemplate>
-                                                        </div>
-                                                    </FooterTemplate>
-                                                </asp:Repeater>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-8">
-                                                <div class="well well-sm">
-                                                    <span class="ms-commandLink">
-                                                        <asp:Panel ID="breadcrumb" runat="server" />
-                                                    </span>
+                                        <asp:UpdatePanel runat="server" RenderMode="Inline" UpdateMode="Conditional" ValidateRequestMode="Disabled">
+                                            <ContentTemplate>
+                                                <div>
+                                                    <div class="form-group">
+                                                        <label for="fileShareServerName">Fileshare Server Name</label>
+                                                        <asp:TextBox ID="fileShareServerName" CssClass="form-control ms-uppercase" runat="server"></asp:TextBox>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="fileShareName">File share name</label>
+                                                        <asp:TextBox ID="fileShareName" CssClass="form-control ms-uppercase" runat="server"></asp:TextBox>
+                                                    </div>
+                                                    <asp:Button OnClick="fileShareBind_Click" ID="fileShareBind" Text="Get data" runat="server" />
                                                 </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <asp:Button CssClass="btn btn-primary btn-lg btn-block" ID="createRandomFile" Visible="false" runat="server" Text="Create Random File (Test)" OnClick="createRandomFile_Click" />
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <h3 class="ms-webpart-titleText">Folders</h3>
-                                                <table class="table table-striped table-bordered table-condensed table-responsive">
-                                                    <asp:Repeater ID="directoryList" runat="server" OnItemDataBound="directoryList_ItemDataBound">
-                                                        <HeaderTemplate>
-                                                            <tr>
-                                                                <th>Folder Name</th>
-                                                                <th>Sub Directories/Files</th>
-                                                                <th>Created</th>
-                                                                <th>Last Modified</th>
-                                                            </tr>
-                                                        </HeaderTemplate>
-                                                        <ItemTemplate>
-                                                            <tr>
-                                                                <td>
-                                                                    <asp:HyperLink CssClass="ms-listLink" runat="server" ID="folderName"></asp:HyperLink></td>
-                                                                <td>
-                                                                    <asp:Label runat="server" ID="fileCount"></asp:Label></td>
-                                                                <td>
-                                                                    <asp:Label runat="server" ID="folderCreated"></asp:Label></td>
-                                                                <td>
-                                                                    <asp:Label runat="server" ID="folderLastModified"></asp:Label></td>
-                                                            </tr>
-                                                        </ItemTemplate>
-                                                        <FooterTemplate>
-                                                        </FooterTemplate>
-                                                    </asp:Repeater>
-                                                </table>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <h3 class="ms-webpart-titleText">Files</h3>
-                                                <table class="table table-striped table-bordered table-hover">
-                                                    <asp:Repeater ID="fileList" runat="server" OnItemDataBound="fileList_ItemDataBound">
-                                                        <HeaderTemplate>
-                                                            <tr>
-                                                                <th>Name</th>
-                                                                <th>Size</th>
-                                                                <th>Ext</th>
-                                                                <th>Attributes</th>
-                                                                <th>Created</th>
-                                                                <th>Last Modified</th>
-                                                                <th>Actions</th>
-                                                            </tr>
-                                                        </HeaderTemplate>
-                                                        <ItemTemplate>
-                                                            <tr>
-                                                                <td>
-                                                                    <asp:HyperLink CssClass="ms-listLink" runat="server" ID="filename"></asp:HyperLink></td>
-                                                                <td>
-                                                                    <asp:Label runat="server" ID="fileSize"></asp:Label></td>
-                                                                <td>
-                                                                    <asp:Label runat="server" ID="fileExt"></asp:Label></td>
-                                                                <td>
-                                                                    <asp:Label runat="server" ID="fileAttributes"></asp:Label></td>
-                                                                <td>
-                                                                    <asp:Label runat="server" ID="fileCreated"></asp:Label></td>
-                                                                <td>
-                                                                    <asp:Label runat="server" ID="fileLastModified"></asp:Label></td>
-                                                                <td>
-                                                                    <button id="actionsLink" type="button" runat="server">Actions</button>
-                                                                </td>
-                                                            </tr>
-                                                        </ItemTemplate>
-                                                        <FooterTemplate>
-                                                        </FooterTemplate>
-                                                    </asp:Repeater>
-                                                </table>
-                                            </div>
-                                        </div>
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-md-8">
+                                                                <div class="well well-sm">
+                                                                    <span class="ms-commandLink">
+                                                                        <asp:Panel ID="breadcrumb" runat="server" />
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <asp:Button CssClass="btn btn-primary btn-lg btn-block" ID="createRandomFile" Visible="false" runat="server" Text="Create Random File (Test)" OnClick="createRandomFile_Click" />
+                                                            </div>
+                                                        </div>
+                                                        <asp:Repeater ID="fileShareList" runat="server" OnItemDataBound="fileShareList_ItemDataBound">
+                                                            <HeaderTemplate>
+                                                                <h3 class="ms-webpart-titleText">Chose a file share to browse</h3>
+                                                                <div class="list-group">
+                                                            </HeaderTemplate>
+                                                            <ItemTemplate>
+                                                                <asp:HyperLink ID="fileShareUrl" CssClass="list-group-item" runat="server"></asp:HyperLink>
+                                                            </ItemTemplate>
+                                                            <FooterTemplate>
+                                                                </div>
+                                                            </FooterTemplate>
+                                                        </asp:Repeater>
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <h3 class="ms-webpart-titleText">Folders</h3>
+                                                                <table class="table table-striped table-bordered table-condensed table-responsive">
+                                                                    <asp:Repeater ID="directoryList" runat="server" OnItemDataBound="directoryList_ItemDataBound" OnItemCommand="directoryList_ItemCommand">
+                                                                        <HeaderTemplate>
+                                                                            <tr>
+                                                                                <th>Folder Name</th>
+                                                                                <th>Sub Directories/Files</th>
+                                                                                <th>Created</th>
+                                                                                <th>Last Modified</th>
+                                                                            </tr>
+                                                                        </HeaderTemplate>
+                                                                        <ItemTemplate>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <asp:LinkButton CssClass="ms-listLink" runat="server" ID="folderName"></asp:LinkButton>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <asp:Label runat="server" ID="fileCount"></asp:Label></td>
+                                                                                <td>
+                                                                                    <asp:Label runat="server" ID="folderCreated"></asp:Label></td>
+                                                                                <td>
+                                                                                    <asp:Label runat="server" ID="folderLastModified"></asp:Label></td>
+                                                                            </tr>
+                                                                        </ItemTemplate>
+                                                                        <FooterTemplate>
+                                                                        </FooterTemplate>
+                                                                    </asp:Repeater>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <h3 class="ms-webpart-titleText">Files</h3>
+                                                                <table class="table table-striped table-bordered table-hover">
+                                                                    <asp:Repeater ID="fileList" runat="server" OnItemDataBound="fileList_ItemDataBound">
+                                                                        <HeaderTemplate>
+                                                                            <tr>
+                                                                                <th>Name</th>
+                                                                                <th>Size</th>
+                                                                                <th>Ext</th>
+                                                                                <th>Attributes</th>
+                                                                                <th>Created</th>
+                                                                                <th>Last Modified</th>
+                                                                                <th>Actions</th>
+                                                                            </tr>
+                                                                        </HeaderTemplate>
+                                                                        <ItemTemplate>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <asp:HyperLink CssClass="ms-listLink" runat="server" ID="filename"></asp:HyperLink></td>
+                                                                                <td>
+                                                                                    <asp:Label runat="server" ID="fileSize"></asp:Label></td>
+                                                                                <td>
+                                                                                    <asp:Label runat="server" ID="fileExt"></asp:Label></td>
+                                                                                <td>
+                                                                                    <asp:Label runat="server" ID="fileAttributes"></asp:Label></td>
+                                                                                <td>
+                                                                                    <asp:Label runat="server" ID="fileCreated"></asp:Label></td>
+                                                                                <td>
+                                                                                    <asp:Label runat="server" ID="fileLastModified"></asp:Label></td>
+                                                                                <td>
+                                                                                    <button id="actionsLink" type="button" runat="server">Actions</button>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </ItemTemplate>
+                                                                        <FooterTemplate>
+                                                                        </FooterTemplate>
+                                                                    </asp:Repeater>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </ContentTemplate>
+                                        </asp:UpdatePanel>
                                     </div>
                                 </div>
                             </div>
@@ -303,6 +308,7 @@
                     </div>
                 </div>
             </div>
+        </div>
     </form>
 </body>
 </html>

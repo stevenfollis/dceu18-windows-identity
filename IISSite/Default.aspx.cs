@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Web.UI.HtmlControls;
@@ -9,32 +8,31 @@ using System.IO;
 using System.Security.Principal;
 using System.Text;
 using System.Configuration;
-using System.Web.Configuration;
 using System.Security.Claims;
 using System.Globalization;
-using System.Collections.Specialized;
 using System.Data.SqlClient;
 using System.Data;
 using IISSite.Helpers;
 using IISSite.Models;
 using System.DirectoryServices;
-using System.DirectoryServices.AccountManagement;
+using System.Web.Helpers;
 
 namespace IISSite
 {
     public partial class Default : System.Web.UI.Page
     {
-        string fileShareRootPath = string.Empty;
-        string fileShareVirtualDirectory = string.Empty;
-        string currentPath = @"\";
-        string decodedVal = string.Empty;
-        string fileShareConfigId = string.Empty;
-        DirectoryInfo currentDirectory = null;
-        DirectoryInfo[] curFolders = null;
-        FileInfo[] curDirFiles = null;
-        DirectoryInfo currentParent = null;
-        string FileSharePath = string.Empty;
-        string fileShareServerName = string.Empty;
+       // private string fileShareRootPath;
+
+        //string fileShareRootPath = string.Empty;
+        //string fileShareVirtualDirectory = string.Empty;
+        //string currentPath = @"\";
+        //string decodedVal = string.Empty;
+        //string fileShareConfigId = string.Empty;
+        //DirectoryInfo currentDirectory = null;
+        //DirectoryInfo[] curFolders = null;
+        //FileInfo[] curDirFiles = null;
+        //DirectoryInfo currentParent = null;
+        //string FileSharePath = string.Empty;
 
         protected override void OnLoad(EventArgs e)
         {
@@ -83,31 +81,13 @@ namespace IISSite
 
         private void bindFileshareTab()
         {
-            
+
         }
 
         private void bindUserData()
         {
             loginName.Text = Request.LogonUserIdentity.Name;
         }
-
-        //protected override void OnInit(EventArgs e)
-        //{
-        //    //if its a user, then ensure its a windows user, else, kick them out
-        //    if (Page.User.Identity.IsAuthenticated)
-        //    {
-        //        HttpContext.Current.Response.AddHeader("Pragma", "No-Cache");
-        //        HttpContext.Current.Response.CacheControl = "Private";
-        //        HttpContext.Current.Response.AppendHeader("Access-Control-Allow-Origin", "*");
-        //        HttpContext.Current.Response.AppendHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
-        //        currentBrowseFolder.Text = "[Choose Folder]";
-        //    }
-        //    else
-        //    {
-        //        HttpContext.Current.Response.StatusCode = 401;
-        //        HttpContext.Current.Response.Write("Access denied. No token");
-        //    }
-        //}
 
         private void toggleError(string p)
         {
@@ -152,14 +132,10 @@ namespace IISSite
 
         private void bindGroupsTab()
         {
-            StringDictionary groups = new StringDictionary();
+            List<ADGroup> groups = new List<ADGroup>();
             try
             {
-                foreach (IdentityReference g in Request.LogonUserIdentity.Groups)
-                {
-                    string groupName = new System.Security.Principal.SecurityIdentifier(g.Value).Translate(typeof(System.Security.Principal.NTAccount)).ToString();
-                    groups.Add(groupName, g.Value);
-                }
+                groups = LdapHelper.GetADGroups(Request.LogonUserIdentity.Groups);
                 userGroupsGrid.DataSource = groups;
                 userGroupsGrid.DataBind();
             }
@@ -196,72 +172,108 @@ namespace IISSite
                 toggleError(sqlex.ToString());
             }
         }
-        private void BindFiles(Claim userUpn)
+
+        protected void fileShareBind_Click(object sender, EventArgs e)
         {
-            fileShareServerName = currentBrowseFolder.Text;
-
-            if (userUpn != null)
+            ClaimsIdentity currentClaims = Request.LogonUserIdentity;
+            Claim upnClaim = currentClaims.Claims.FirstOrDefault(c => c.Type.ToString(CultureInfo.InvariantCulture) == ClaimTypes.Upn);
+            //if (upnClaim != null)
+            //{ 
+            string serverName = fileShareServerName.Text;
+            string fileFolderName = fileShareName.Text;
+            string fileShareRootPath = $@"\\{serverName}\{fileFolderName}";
+            FileShareItem rootFileShareItem = new FileShareItem()
             {
-                try
+                ParentFileShare = serverName,
+                ActualPath = fileShareRootPath,
+                DisplayName = fileFolderName
+                
+            };
+            BindFiles(rootFileShareItem);
+            //}
+            //else
+            //{
+            //    toggleError("No UPN");
+            //}
+        }
+        private void BindFiles(FileShareItem fileShareItem)
+        {
+            //string serverName = fileShareServerName.Text;
+            //string fileFolderName = fileShareName.Text;
+            string fileShareRootPath = fileShareItem.ActualPath;
+
+            //string fileShareVirtualDirectory = string.Empty;
+            //string currentPath = @"\";
+            //string decodedVal = string.Empty;
+            //string fileShareConfigId = string.Empty;
+            DirectoryInfo currentDirectory = null;
+            DirectoryInfo[] curFolders = null;
+            FileInfo[] curDirFiles = null;
+            DirectoryInfo currentParent = null;
+
+            //if (userUpn != null)
+            //{
+            try
+            {
+                //Impersonate the current user to get the files to browse
+                //WindowsIdentity wi = new WindowsIdentity(userUpn.Value);
+                //using (WindowsImpersonationContext wCtx = wi.Impersonate())
+                //{
+                currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
+                if (System.IO.Directory.Exists(fileShareRootPath))
                 {
-                    //Impersonate the current user to get the files to browse
-                    WindowsIdentity wi = new WindowsIdentity(userUpn.Value);
-                    using (WindowsImpersonationContext wCtx = wi.Impersonate())
+                    curFolders = currentDirectory.GetDirectories();
+                    curDirFiles = currentDirectory.GetFiles();
+                    //if there are no children and we are not at the root, show parents
+                    if (currentDirectory.Parent != null)
                     {
-                        currentDirectory = new DirectoryInfo(FileSharePath);
-                        if (System.IO.Directory.Exists(FileSharePath))
+                        if (currentDirectory.Parent.FullName == fileShareRootPath)
                         {
-                            curFolders = currentDirectory.GetDirectories();
-                            curDirFiles = currentDirectory.GetFiles();
-                            //if there are no children and we are not at the root, show parents
-                            if (currentDirectory.Parent != null)
-                            {
-                                if (currentDirectory.Parent.FullName == FileSharePath)
-                                {
-                                    //We are at the root
-                                    currentParent = currentDirectory;
-                                }
-                            }
-                            else
-                            {
-                                currentParent = currentDirectory.Parent;
-                            }
-
-                            currentBrowseFolder.Text = currentDirectory.FullName;
-                            directoryList.DataSource = curFolders;
-                            directoryList.DataBind();
-
-                            fileList.DataSource = curDirFiles;
-                            fileList.DataBind();
-
-                            //Build the breadcrumb for the page
-                            BuildBreadcrumb(FileSharePath, fileShareRootPath);
-                            wCtx.Undo();
-                        }
-                        else
-                        {
-                            //The configured directory does not exist or is invalid
+                            //We are at the root
+                            currentParent = currentDirectory;
                         }
                     }
+                    else
+                    {
+                        //We are at the root
+                        currentParent = currentDirectory;
+                    }
+
+                    directoryList.DataSource = curFolders;
+                    directoryList.DataBind();
+
+                    fileList.DataSource = curDirFiles;
+                    fileList.DataBind();
+
+                    //Build the breadcrumb for the page
+                    BuildBreadcrumb(fileShareRootPath, fileShareRootPath);
+                    //wCtx.Undo();
                 }
-                catch (System.Security.SecurityException)
+                else
                 {
-                    toggleError(string.Format("Unable to impersonate user. User UPN is {0}. Only synced identities are supported.", userUpn.Value));
-                }
-                catch (System.UnauthorizedAccessException)
-                {
-                    //Do something with this error
+                    //The configured directory does not exist or is invalid
+                    //}
                 }
             }
+            catch (System.Security.SecurityException)
+            {
+                toggleError(string.Format("Access denied"));
+            }
+            catch (System.UnauthorizedAccessException)
+            {
+                //Do something with this error
+                toggleError(string.Format("Access denied"));
+            }
+            //}
         }
 
-        public List<WebControl> BuildBreadcrumb(string relativeFileSharePath, string RootFileShare)
+        public void BuildBreadcrumb(string relativeFileSharePath, string RootFileShare)
         {
             //Remove the current root from the path and trim the extra backslashes
             string trimmedPath = relativeFileSharePath.Replace(RootFileShare, "").TrimStart('\\').TrimEnd('\\');
             string[] crumbPath = trimmedPath.Split('\\');
             string breadCrumbSepChar = " / ";
-            List<WebControl> links = new List<WebControl>();
+            ControlCollection links = new ControlCollection(breadcrumb);
             HyperLink link = new HyperLink
             {
                 Text = RootFileShare,
@@ -283,8 +295,10 @@ namespace IISSite
                     sepChar = new Label();
                     sepChar.Text = breadCrumbSepChar;
                     links.Add(sepChar);
-                    link = new HyperLink();
-                    link.Text = currentNode;
+                    link = new HyperLink
+                    {
+                        Text = currentNode
+                    };
                     curPath.Append(currentNode);
                     curPath.Append(@"\");
                     link.NavigateUrl = UrlUtility.BuildFolderUri(curPath.ToString(), RootFileShare).ToString();
@@ -305,8 +319,6 @@ namespace IISSite
                 lastNode.Text = curPathNode;
                 links.Add(lastNode);
             }
-
-            return links;
         }
 
         protected void ldapBind_Click(object sender, EventArgs e)
@@ -317,7 +329,7 @@ namespace IISSite
             try
             {
                 DirectoryEntry rootEntry = new DirectoryEntry($@"LDAP://{fqdnToSearch}");
-                rootEntry.AuthenticationType = AuthenticationTypes.Secure;
+                rootEntry.AuthenticationType = System.DirectoryServices.AuthenticationTypes.Secure;
                 SearchResultCollection searchResults = null;
                 DirectorySearcher searcher = new DirectorySearcher(rootEntry);
                 searcher.SearchScope = SearchScope.Subtree;
@@ -368,7 +380,7 @@ namespace IISSite
                 Label attributes = parentItem.FindControl("fileAttributes") as Label;
                 Label created = parentItem.FindControl("fileCreated") as Label;
                 Label lastModifed = parentItem.FindControl("fileLastModified") as Label;
-                HtmlButton shareLink = parentItem.FindControl("shareLink") as HtmlButton;
+                //HtmlButton shareLink = parentItem.FindControl("shareLink") as HtmlButton;
                 string fileDisplayName;
                 string filePath;
                 string fileUrl;
@@ -380,14 +392,14 @@ namespace IISSite
                     //fileUrl = currentFile.FullName;
                     fileName.Text = fileDisplayName;
                     fileName.ToolTip = filePath;
-                    fileUrl = Server.UrlPathEncode(UrlUtility.BuildFileUri(currentFile.FullName, fileShareRootPath).ToString());
+                    fileUrl = Server.UrlPathEncode(UrlUtility.BuildFileUri(currentFile.FullName, currentFile.DirectoryName).ToString());
                     fileName.NavigateUrl = fileUrl;
                     size.Text = FileShareHelper.DisplayFileSizeFromBytes(currentFile.Length);
                     ext.Text = currentFile.Extension;
                     attributes.Text = currentFile.Attributes.ToString();
                     created.Text = currentFile.CreationTime.ToString();
                     lastModifed.Text = currentFile.LastWriteTime.ToString();
-                    shareLink.Attributes.Add("href", "sharelink.aspx?u=" + fileUrl);
+                    //shareLink.Attributes.Add("href", "sharelink.aspx?u=" + fileUrl);
                 }
             }
         }
@@ -399,7 +411,7 @@ namespace IISSite
             if (parentItem.ItemType == ListItemType.Item || parentItem.ItemType == ListItemType.AlternatingItem)
             {
                 currentFolder = parentItem.DataItem as DirectoryInfo;
-                HyperLink folderName = parentItem.FindControl("folderName") as HyperLink;
+                LinkButton folderName = parentItem.FindControl("folderName") as LinkButton;
                 Label count = parentItem.FindControl("fileCount") as Label;
                 Label created = parentItem.FindControl("folderCreated") as Label;
                 Label lastModifed = parentItem.FindControl("folderLastModified") as Label;
@@ -413,7 +425,19 @@ namespace IISSite
                     {
                         count.Text = currentFolder.EnumerateFileSystemInfos().Count().ToString();
                         folderName.Text = string.Format("<span class='glyphicon {0}'></span>&nbsp;<span class=''>{1}</span>", "glyphicon-ok-circle", currentFolder.Name);
-                        folderName.NavigateUrl = UrlUtility.BuildFolderUri(currentFolder.FullName, fileShareRootPath).ToString();
+                        FileShareItem fs = new FileShareItem()
+                        {
+                            ActualPath = currentFolder.FullName,
+                            DisplayName = currentFolder.Name,
+                            ParentFileShare = currentFolder.Root.Name
+                        };
+
+                        if (currentFolder.GetDirectories().Length > 0)
+                        {
+                            //Folder has sub folders, enumerate those
+                        }
+                        folderName.CommandArgument = Json.Encode(fs);
+                        folderName.CommandName = "listfiles";
                         created.Text = currentFolder.CreationTime.ToString();
                         lastModifed.Text = currentFolder.LastWriteTime.ToString();
                     }
@@ -436,6 +460,18 @@ namespace IISSite
                 curLink = e.Item.FindControl("fileShareUrl") as HyperLink;
                 curLink.NavigateUrl = UrlUtility.BuildShareUri(curFileShare.DisplayName).ToString();
                 curLink.Text = curFileShare.DisplayName;
+            }
+        }
+
+        protected void directoryList_ItemCommand(object sender, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName == "listfiles")
+            {
+                // Get the value of command argument
+                var value = e.CommandArgument;
+                // Do whatever operation you want.  
+                FileShareItem fs = Json.Decode<FileShareItem>(e.CommandArgument.ToString());
+                BindFiles(fs);
             }
         }
 

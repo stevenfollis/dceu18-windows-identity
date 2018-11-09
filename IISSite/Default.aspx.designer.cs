@@ -166,40 +166,31 @@ namespace IISSite {
         protected global::System.Web.UI.WebControls.DataGrid ldapDataGrid;
         
         /// <summary>
-        /// currentBrowseServer control.
+        /// fileShareServerName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox currentBrowseServer;
+        protected global::System.Web.UI.WebControls.TextBox fileShareServerName;
         
         /// <summary>
-        /// currentBrowseFolder control.
+        /// fileShareName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox currentBrowseFolder;
+        protected global::System.Web.UI.WebControls.TextBox fileShareName;
         
         /// <summary>
-        /// fileShareloginName control.
+        /// fileShareBind control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LoginName fileShareloginName;
-        
-        /// <summary>
-        /// fileShareList control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater fileShareList;
+        protected global::System.Web.UI.WebControls.Button fileShareBind;
         
         /// <summary>
         /// breadcrumb control.
@@ -218,6 +209,15 @@ namespace IISSite {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button createRandomFile;
+        
+        /// <summary>
+        /// fileShareList control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater fileShareList;
         
         /// <summary>
         /// directoryList control.
