@@ -16,6 +16,7 @@ using IISSite.Helpers;
 using IISSite.Models;
 using System.DirectoryServices;
 using System.Web.Helpers;
+using Microsoft.SqlServer.Server;
 
 namespace IISSite
 {
@@ -167,18 +168,26 @@ namespace IISSite
         protected void GetSQLData_Click(object sender, EventArgs e)
         {
             // Open the connection.
-            sqlResults.Visible = true;
+            ToggleError("", databaseTabError);
             //string sqlQuery = "SELECT TOP 1000 [Id],[ParentCategoryId],[Path],[Name],[NumActiveAds] FROM [Classifieds].[dbo].[Categories]";
             string sqlQuery = dbQuery.Text;
 
             try
             {
-                SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder();
-                sqlConnectionString.DataSource = dbServerName.Text;
-                sqlConnectionString.InitialCatalog = dbDatabaseName.Text;
+                SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder
+                {
+                    IntegratedSecurity = true,
+                    DataSource = dbServerName.Text,
+                    InitialCatalog = dbDatabaseName.Text,
+                    //Authentication = SqlAuthenticationMethod.ActiveDirectoryIntegrated,
+                    TrustServerCertificate = true
+                };
                 DataSet ds = new DataSet();
                 SqlConnection dbConnection = null;
                 SqlDataAdapter dataadapter = null;
+                dbConnection = new SqlConnection(sqlConnectionString.ToString());
+                dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
+
                 if (backendCallType.SelectedValue == "asuser")
                 {
                     //Impersonate the current user to get the files to browse
@@ -188,11 +197,8 @@ namespace IISSite
                         WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
                         using (WindowsImpersonationContext wCtx = wi.Impersonate())
                         {
-                            dbConnection = new SqlConnection(sqlConnectionString.ToString());
                             // Run the SQL statement, and then get the returned rows to the DataReader.
-                            dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
                             dbConnection.Open();
-                            dataadapter.Fill(ds, "data");
                             wCtx.Undo();
                         }
                     }
@@ -203,19 +209,20 @@ namespace IISSite
                 }
                 else
                 {
-                    dbConnection = new SqlConnection(sqlConnectionString.ToString());
                     // Run the SQL statement, and then get the returned rows to the DataReader.
-                    dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
                     dbConnection.Open();
-                    dataadapter.Fill(ds, "data");
                 }
+
+                dataadapter.Fill(ds, "data");
                 dbConnection.Close();
                 sqlDataGrid.DataSource = ds.Tables["data"].DefaultView;
                 sqlDataGrid.DataBind();
+                sqlResults.Visible = true;
             }
             catch (Exception sqlex)
             {
                 ToggleError($"GetSQLData_Click::{sqlex.ToString()}", databaseTabError);
+                sqlResults.Visible = false;
             }
         }
 
