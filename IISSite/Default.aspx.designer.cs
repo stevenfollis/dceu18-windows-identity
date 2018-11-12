@@ -40,6 +40,15 @@ namespace IISSite {
         protected global::System.Web.UI.WebControls.Label UserSourceLocation;
         
         /// <summary>
+        /// backendCallType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButtonList backendCallType;
+        
+        /// <summary>
         /// errLabel control.
         /// </summary>
         /// <remarks>
@@ -47,6 +56,15 @@ namespace IISSite {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label errLabel;
+        
+        /// <summary>
+        /// claimsTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label claimsTabError;
         
         /// <summary>
         /// claimsGrid control.
@@ -58,6 +76,15 @@ namespace IISSite {
         protected global::System.Web.UI.WebControls.DataGrid claimsGrid;
         
         /// <summary>
+        /// winPrincipalTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label winPrincipalTabError;
+        
+        /// <summary>
         /// userGroupsGrid control.
         /// </summary>
         /// <remarks>
@@ -65,6 +92,24 @@ namespace IISSite {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DataGrid userGroupsGrid;
+        
+        /// <summary>
+        /// databaseTabErrorPanel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel databaseTabErrorPanel;
+        
+        /// <summary>
+        /// databaseTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label databaseTabError;
         
         /// <summary>
         /// dbServerName control.
@@ -130,6 +175,15 @@ namespace IISSite {
         protected global::System.Web.UI.WebControls.DataGrid sqlDataGrid;
         
         /// <summary>
+        /// ldapTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label ldapTabError;
+        
+        /// <summary>
         /// ldapDomainname control.
         /// </summary>
         /// <remarks>
@@ -166,6 +220,24 @@ namespace IISSite {
         protected global::System.Web.UI.WebControls.DataGrid ldapDataGrid;
         
         /// <summary>
+        /// msmqTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label msmqTabError;
+        
+        /// <summary>
+        /// fileshareTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label fileshareTabError;
+        
+        /// <summary>
         /// fileShareServerName control.
         /// </summary>
         /// <remarks>
@@ -193,13 +265,13 @@ namespace IISSite {
         protected global::System.Web.UI.WebControls.Button fileShareBind;
         
         /// <summary>
-        /// breadcrumb control.
+        /// breadcrumbLinks control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel breadcrumb;
+        protected global::System.Web.UI.WebControls.DataList breadcrumbLinks;
         
         /// <summary>
         /// createRandomFile control.

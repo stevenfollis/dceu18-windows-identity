@@ -86,6 +86,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include=".gitattributes" />
+    <Content Include=".gitignore" />
     <Content Include="Page.html" />
     <Content Include="Web.config" />
     <Content Include="Default.aspx" />

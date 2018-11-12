@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DirectoryServices.AccountManagement;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Security.Principal;
 using System.Web;
@@ -31,6 +33,45 @@ namespace IISSite.Helpers
             }
 
             return aDGroups;
+        }
+
+        public static ADUser GetAdUser(string userName)
+        {
+            ADUser adUser = null;
+
+            try
+            {
+                // set up domain context
+                PrincipalContext ctx = new PrincipalContext(ContextType.Domain);
+
+                // find a user
+                UserPrincipal user = UserPrincipal.FindByIdentity(ctx, userName);
+
+                if (user != null)
+                {
+                    Domain userDomain = Domain.GetCurrentDomain();
+                    adUser = new ADUser()
+                    {
+                        UserName = user.Name,
+                        UserPrincipalName = user.UserPrincipalName,
+                        Sid = user.Sid,
+                        FirstName = user.GivenName,
+                        SurName = user.Surname,
+                        EmailAddress = user.EmailAddress,
+                        DisplayName = user.DisplayName,
+                        DistinguishedName = user.DistinguishedName,
+                        SamAccountName = user.SamAccountName,
+                        ParentDomain = userDomain.Name,
+                        ParentForest = userDomain.Forest,
+                    };
+                }
+
+            }
+            catch(Exception ex)
+            {
+                
+            }
+            return adUser;
         }
     }
 }

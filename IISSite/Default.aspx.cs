@@ -39,18 +39,18 @@ namespace IISSite
             if (!Page.IsPostBack)
             {
                 //ShowData.Attributes["class"] = "btn btn-link collapsed";
-                toggleError();
-                bindUserData();
-                bindClaimsTab();
-                bindGroupsTab();
-                bindSqlTab();
-                bindLdapTab();
-                bindMsmqTab();
-                bindFileshareTab();
+                ToggleError();
+                BindUserData();
+                BindClaimsTab();
+                BindGroupsTab();
+                BindSqlTab();
+                BindLdapTab();
+                BindMsmqTab();
+                BindFileshareTab();
             }
         }
 
-        private void bindSqlTab()
+        private void BindSqlTab()
         {
             //If there is a SQL connection string configured, set it in the UI
             string connString = ConfigurationManager.ConnectionStrings["RemoteSqlServer"]?.ToString();
@@ -69,68 +69,87 @@ namespace IISSite
             }
         }
 
-        private void bindLdapTab()
+        private void BindLdapTab()
+        {
+            //Prefill with the current domain
+            ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
+            if (currentUser != null)
+            {
+                ldapDomainname.Text = currentUser.ParentForest.Name;
+            }
+        }
+
+        private void BindMsmqTab()
         {
             
         }
 
-        private void bindMsmqTab()
-        {
-            
-        }
-
-        private void bindFileshareTab()
+        private void BindFileshareTab()
         {
 
         }
 
-        private void bindUserData()
+        private void BindUserData()
         {
-            loginName.Text = Request.LogonUserIdentity.Name;
+            ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
+            if (currentUser != null)
+            {
+                loginName.Text = currentUser.DisplayName;
+            }
         }
 
-        private void toggleError(string p)
+        private void ToggleError(string p, Label errorControl)
         {
-            errLabel.Text = p;
-            errLabel.Visible = true;
+            if (errorControl != null)
+            {
+                errorControl.Text = p;
+                errorControl.Visible = true;
+            }
         }
 
-        private void toggleError()
+        private void ToggleError()
         {
             errLabel.Text = string.Empty;
             errLabel.Visible = false;
         }
-        private void bindClaimsTab()
+        private void BindClaimsTab()
         {
-            ClaimsIdentity currentClaims = Request.LogonUserIdentity;
-
-            string networkClaimType = "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork";
-            string userLocationLabel = "{0} the corporate network";
-            string userLocation = "UNKNOWN";
-            Claim sourceClaim = currentClaims.Claims.FirstOrDefault(c => c.Type.ToString(CultureInfo.InvariantCulture) == networkClaimType);
-            if (sourceClaim != null)
+            try
             {
-                if (sourceClaim.Value.ToUpper() == "TRUE")
+                ClaimsIdentity claimsIdentity = Request.LogonUserIdentity;
+
+                string networkClaimType = "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork";
+                string userLocationLabel = "{0} the corporate network";
+                string userLocation = "UNKNOWN";
+                Claim sourceClaim = claimsIdentity.Claims.FirstOrDefault(c => c.Type.ToString(CultureInfo.InvariantCulture) == networkClaimType);
+                if (sourceClaim != null)
                 {
-                    userLocation = "INSIDE";
+                    if (sourceClaim.Value.ToUpper() == "TRUE")
+                    {
+                        userLocation = "INSIDE";
+                    }
+                    else
+                    {
+                        userLocation = "OUTSIDE";
+                    }
                 }
                 else
                 {
-                    userLocation = "OUTSIDE";
+                    //Could not determine the network type
+                    userLocationLabel = "{0} network";
                 }
+                UserSourceLocation.Text = string.Format(userLocationLabel, userLocation);
+                claimsGrid.DataSource = claimsIdentity.Claims;
+                claimsGrid.AutoGenerateColumns = false;
+                claimsGrid.DataBind();
             }
-            else
+            catch (Exception ex)
             {
-                //Could not determine the network type
-                userLocationLabel = "{0} network";
+                ToggleError($"BindClaimsTab::Error{ex.ToString()}", claimsTabError);
             }
-            UserSourceLocation.Text = string.Format(userLocationLabel, userLocation);
-            claimsGrid.DataSource = currentClaims.Claims;
-            claimsGrid.AutoGenerateColumns = false;
-            claimsGrid.DataBind();
         }
 
-        private void bindGroupsTab()
+        private void BindGroupsTab()
         {
             List<ADGroup> groups = new List<ADGroup>();
             try
@@ -141,10 +160,11 @@ namespace IISSite
             }
             catch (Exception gex)
             {
-                toggleError("An error occurred translating group names::" + gex.ToString());
+                ToggleError($"BindGroupsTab::{gex.ToString()}", winPrincipalTabError);
             }
         }
-        protected void GetData_Click(object sender, EventArgs e)
+
+        protected void GetSQLData_Click(object sender, EventArgs e)
         {
             // Open the connection.
             sqlResults.Visible = true;
@@ -156,50 +176,85 @@ namespace IISSite
                 SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder();
                 sqlConnectionString.DataSource = dbServerName.Text;
                 sqlConnectionString.InitialCatalog = dbDatabaseName.Text;
-
-                SqlConnection dbConnection = new SqlConnection(sqlConnectionString.ToString());
-                // Run the SQL statement, and then get the returned rows to the DataReader.
-                SqlDataAdapter dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
                 DataSet ds = new DataSet();
-                dbConnection.Open();
-                dataadapter.Fill(ds, "data");
+                SqlConnection dbConnection = null;
+                SqlDataAdapter dataadapter = null;
+                if (backendCallType.SelectedValue == "asuser")
+                {
+                    //Impersonate the current user to get the files to browse
+                    ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
+                    if (currentUser != null)
+                    {
+                        WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
+                        using (WindowsImpersonationContext wCtx = wi.Impersonate())
+                        {
+                            dbConnection = new SqlConnection(sqlConnectionString.ToString());
+                            // Run the SQL statement, and then get the returned rows to the DataReader.
+                            dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
+                            dbConnection.Open();
+                            dataadapter.Fill(ds, "data");
+                            wCtx.Undo();
+                        }
+                    }
+                    else
+                    {
+                        ToggleError("GetSQLData_Click::Could not bind AD User", databaseTabError);
+                    }
+                }
+                else
+                {
+                    dbConnection = new SqlConnection(sqlConnectionString.ToString());
+                    // Run the SQL statement, and then get the returned rows to the DataReader.
+                    dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
+                    dbConnection.Open();
+                    dataadapter.Fill(ds, "data");
+                }
                 dbConnection.Close();
                 sqlDataGrid.DataSource = ds.Tables["data"].DefaultView;
                 sqlDataGrid.DataBind();
             }
             catch (Exception sqlex)
             {
-                toggleError(sqlex.ToString());
+                ToggleError($"GetSQLData_Click::{sqlex.ToString()}", databaseTabError);
             }
         }
 
-        protected void fileShareBind_Click(object sender, EventArgs e)
+        protected void FileShareBind_Click(object sender, EventArgs e)
         {
-            ClaimsIdentity currentClaims = Request.LogonUserIdentity;
-            Claim upnClaim = currentClaims.Claims.FirstOrDefault(c => c.Type.ToString(CultureInfo.InvariantCulture) == ClaimTypes.Upn);
+            //ClaimsIdentity currentClaims = Request.LogonUserIdentity;
+            //Claim upnClaim = currentClaims.Claims.FirstOrDefault(c => c.Type.ToString(CultureInfo.InvariantCulture) == ClaimTypes.Upn);
             //if (upnClaim != null)
             //{ 
-            string serverName = fileShareServerName.Text;
-            string fileFolderName = fileShareName.Text;
-            string fileShareRootPath = $@"\\{serverName}\{fileFolderName}";
-            FileShareItem rootFileShareItem = new FileShareItem()
+            try
             {
-                ParentFileShare = serverName,
-                ActualPath = fileShareRootPath,
-                DisplayName = fileFolderName
-                
-            };
-            BindFiles(rootFileShareItem);
+                string serverName = fileShareServerName.Text;
+                string fileFolderName = fileShareName.Text;
+                string fileShareRootPath = $@"\\{serverName}\{fileFolderName}";
+                FileShareItem rootFileShareItem = new FileShareItem()
+                {
+                    ParentFileShare = serverName,
+                    ActualPath = fileShareRootPath,
+                    DisplayName = fileFolderName
+
+                };
+
+                BindFolders(rootFileShareItem);
+
+                BindFiles(rootFileShareItem);
+            }
+            catch(Exception ex)
+            {
+                ToggleError($"FileShareBind_Click::Error::{ex.ToString()}", fileshareTabError);
+            }
             //}
             //else
             //{
             //    toggleError("No UPN");
             //}
         }
-        private void BindFiles(FileShareItem fileShareItem)
+
+        private void BindFolders(FileShareItem fileShareItem)
         {
-            //string serverName = fileShareServerName.Text;
-            //string fileFolderName = fileShareName.Text;
             string fileShareRootPath = fileShareItem.ActualPath;
 
             //string fileShareVirtualDirectory = string.Empty;
@@ -208,8 +263,88 @@ namespace IISSite
             //string fileShareConfigId = string.Empty;
             DirectoryInfo currentDirectory = null;
             DirectoryInfo[] curFolders = null;
-            FileInfo[] curDirFiles = null;
             DirectoryInfo currentParent = null;
+
+            try
+            {
+                //Impersonate the current user to get the files to browse
+                if (backendCallType.SelectedValue == "asuser")
+                {
+                    ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
+                    WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
+                    using (WindowsImpersonationContext wCtx = wi.Impersonate())
+                    {
+                        currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
+                        if (System.IO.Directory.Exists(fileShareRootPath))
+                        {
+                            curFolders = currentDirectory.GetDirectories();
+                            //if there are no children and we are not at the root, show parents
+                            if (currentDirectory.Parent != null)
+                            {
+                                if (currentDirectory.Parent.FullName == fileShareRootPath)
+                                {
+                                    //We are at the root
+                                    currentParent = currentDirectory;
+                                }
+                            }
+                            else
+                            {
+                                //We are at the root
+                                currentParent = currentDirectory;
+                            }
+                        }
+                        wCtx.Undo();
+                    }
+                }
+                else
+                {
+                    currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
+                    if (System.IO.Directory.Exists(fileShareRootPath))
+                    {
+                        curFolders = currentDirectory.GetDirectories();
+                        //if there are no children and we are not at the root, show parents
+                        if (currentDirectory.Parent != null)
+                        {
+                            if (currentDirectory.Parent.FullName == fileShareRootPath)
+                            {
+                                //We are at the root
+                                currentParent = currentDirectory;
+                            }
+                        }
+                        else
+                        {
+                            //We are at the root
+                            currentParent = currentDirectory;
+                        }
+                    }
+                }
+
+
+                directoryList.DataSource = curFolders;
+                directoryList.DataBind();
+
+                //Build the breadcrumb for the page
+                BuildBreadcrumb(fileShareRootPath, fileShareRootPath);
+            }
+            catch (System.Security.SecurityException)
+            {
+                ToggleError("BindFolders::Error SecurityException", fileshareTabError);
+            }
+            catch (System.UnauthorizedAccessException)
+            {
+                ToggleError("BindFolders::Error Unauthorized", fileshareTabError);
+            }
+            catch (Exception ex)
+            {
+                ToggleError($"BindFolders::Error::{ex.ToString()}", fileshareTabError);
+            }
+}
+        private void BindFiles(FileShareItem fileShareItem)
+        {
+            string fileShareRootPath = fileShareItem.ActualPath;
+
+            DirectoryInfo currentDirectory = null;
+            FileInfo[] curDirFiles = null;
 
             //if (userUpn != null)
             //{
@@ -222,32 +357,10 @@ namespace IISSite
                 currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
                 if (System.IO.Directory.Exists(fileShareRootPath))
                 {
-                    curFolders = currentDirectory.GetDirectories();
                     curDirFiles = currentDirectory.GetFiles();
-                    //if there are no children and we are not at the root, show parents
-                    if (currentDirectory.Parent != null)
-                    {
-                        if (currentDirectory.Parent.FullName == fileShareRootPath)
-                        {
-                            //We are at the root
-                            currentParent = currentDirectory;
-                        }
-                    }
-                    else
-                    {
-                        //We are at the root
-                        currentParent = currentDirectory;
-                    }
-
-                    directoryList.DataSource = curFolders;
-                    directoryList.DataBind();
 
                     fileList.DataSource = curDirFiles;
                     fileList.DataBind();
-
-                    //Build the breadcrumb for the page
-                    BuildBreadcrumb(fileShareRootPath, fileShareRootPath);
-                    //wCtx.Undo();
                 }
                 else
                 {
@@ -257,12 +370,15 @@ namespace IISSite
             }
             catch (System.Security.SecurityException)
             {
-                toggleError(string.Format("Access denied"));
+                ToggleError("BindFiles::Error SecurityException", fileshareTabError);
             }
             catch (System.UnauthorizedAccessException)
             {
-                //Do something with this error
-                toggleError(string.Format("Access denied"));
+                ToggleError("BindFiles::Error Unauthorized", fileshareTabError);
+            }
+            catch (Exception ex)
+            {
+                ToggleError($"BindFiles::Error::{ex.ToString()}", fileshareTabError);
             }
             //}
         }
@@ -272,8 +388,8 @@ namespace IISSite
             //Remove the current root from the path and trim the extra backslashes
             string trimmedPath = relativeFileSharePath.Replace(RootFileShare, "").TrimStart('\\').TrimEnd('\\');
             string[] crumbPath = trimmedPath.Split('\\');
-            string breadCrumbSepChar = " / ";
-            ControlCollection links = new ControlCollection(breadcrumb);
+            //HyperLink breadCrumbSepChar = new HyperLink() { NavigateUrl = "#", Text = "/" };
+            List<HyperLink> links = new List<HyperLink>();
             HyperLink link = new HyperLink
             {
                 Text = RootFileShare,
@@ -293,8 +409,8 @@ namespace IISSite
                 if (i + 1 != crumbPath.Length)
                 {
                     sepChar = new Label();
-                    sepChar.Text = breadCrumbSepChar;
-                    links.Add(sepChar);
+                    HyperLink breadCrumbSepChar = new HyperLink() { NavigateUrl = "#", Text = "/" };
+                    links.Add(breadCrumbSepChar);
                     link = new HyperLink
                     {
                         Text = currentNode
@@ -313,15 +429,20 @@ namespace IISSite
             {
                 //Add the last node
                 sepChar = new Label();
-                sepChar.Text = breadCrumbSepChar;
-                links.Add(sepChar);
-                Label lastNode = new Label();
-                lastNode.Text = curPathNode;
+                HyperLink breadCrumbSepChar = new HyperLink() { NavigateUrl = "#", Text = "/" };
+                links.Add(breadCrumbSepChar);
+                HyperLink lastNode = new HyperLink() {
+                   Text = curPathNode,
+                   NavigateUrl = "#"
+                };
                 links.Add(lastNode);
             }
+            
+            breadcrumbLinks.DataSource = links;
+            breadcrumbLinks.DataBind();
         }
 
-        protected void ldapBind_Click(object sender, EventArgs e)
+        protected void LdapBind_Click(object sender, EventArgs e)
         {
             string fqdnToSearch = ldapDomainname.Text;
             string searchString = Request.LogonUserIdentity.Name;
@@ -363,11 +484,11 @@ namespace IISSite
             }
             catch (Exception ex)
             {
-                toggleError(ex.ToString());
+                ToggleError(ex.ToString(), ldapTabError);
             }
         }
 
-        protected void fileList_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        protected void FileList_ItemDataBound(object sender, RepeaterItemEventArgs e)
         {
             RepeaterItem parentItem = e.Item;
             FileInfo currentFile;
@@ -404,7 +525,7 @@ namespace IISSite
             }
         }
 
-        protected void directoryList_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        protected void DirectoryList_ItemDataBound(object sender, RepeaterItemEventArgs e)
         {
             RepeaterItem parentItem = e.Item;
             DirectoryInfo currentFolder;
@@ -450,7 +571,7 @@ namespace IISSite
             }
         }
 
-        protected void fileShareList_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        protected void FileShareList_ItemDataBound(object sender, RepeaterItemEventArgs e)
         {
             HyperLink curLink = null;
             FileShareItem curFileShare = null;
@@ -463,7 +584,7 @@ namespace IISSite
             }
         }
 
-        protected void directoryList_ItemCommand(object sender, RepeaterCommandEventArgs e)
+        protected void DirectoryList_ItemCommand(object sender, RepeaterCommandEventArgs e)
         {
             if (e.CommandName == "listfiles")
             {
@@ -475,7 +596,7 @@ namespace IISSite
             }
         }
 
-        protected void createRandomFile_Click(object sender, EventArgs e)
+        protected void CreateRandomFile_Click(object sender, EventArgs e)
         {
             //setFileShareConfigContext();
             //if (curFileShareConfig != null)
