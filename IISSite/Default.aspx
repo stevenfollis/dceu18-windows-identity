@@ -190,10 +190,38 @@
                         <div class="tab-pane fade" id="pills-msmq" role="tabpanel" aria-labelledby="pills-msmq-tab">
                             <div class="card">
                                 <div class="card-body">
-                                    <div class="alert alert-danger">
-                                        <asp:Label ID="msmqTabError" runat="server" Visible="false"></asp:Label>
-                                    </div>
-                                    <p>SEND AND RECIEIVE FROM A QUEUE</p>
+                                    <asp:UpdatePanel runat="server" RenderMode="Inline" UpdateMode="Conditional" ValidateRequestMode="Disabled">
+                                        <ContentTemplate>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="alert alert-danger">
+                                                        <asp:Label ID="msmqTabError" runat="server" Visible="false"></asp:Label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="form-group">
+                                                    <label for="msmqQueueName">MSMQ Queue name</label>
+                                                    <asp:TextBox ID="msmqQueueName" CssClass="form-control ms-uppercase" runat="server"></asp:TextBox>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="msmqQueueMsg">Message</label>
+                                                    <asp:TextBox ID="msmqQueueMsg" CssClass="form-control ms-uppercase" runat="server"></asp:TextBox>
+                                                </div>
+                                                <asp:Button ID="msmqQueueSendMessage" OnClick="msmqQueueSendMessage_Click" Text="Send Message" runat="server" />
+                                            </div>
+                                                <div class="form-group">
+                                                    <label for="msmqQueueMsgCount">Message Count</label>
+                                                    <asp:Label ID="msmqQueueMsgCount" CssClass="form-control ms-uppercase" runat="server"></asp:Label>
+                                                </div>
+                                                <asp:Button ID="msmqQueueReadMessageCount" OnClick="msmqQueueReadMessageCount_Click" Text="Read message count" runat="server" />
+                                                <asp:Button ID="msmqQueueReadMessage" OnClick="msmqQueueReadMessage_Click" Text="Read Message" runat="server" />
+                                            <div class="form-group">
+                                                <label for="msmqQueueReadMsg">Read Message</label>
+                                                <asp:TextBox ID="msmqQueueReadMsg" CssClass="form-control ms-uppercase" runat="server"></asp:TextBox>
+                                            </div>
+                                        </ContentTemplate>
+                                    </asp:UpdatePanel>
                                 </div>
                             </div>
                         </div>
@@ -238,7 +266,7 @@
                                                                 </span>
                                                             </div>
                                                         </div>
-<%--                                                        <div class="col-md-4">
+                                                        <%--                                                        <div class="col-md-4">
                                                             <asp:Button CssClass="btn btn-primary btn-lg btn-block" ID="createRandomFile" Visible="true" runat="server" Text="Create Random File (Test)" OnClick="CreateRandomFile_Click" />
                                                         </div>--%>
                                                     </div>

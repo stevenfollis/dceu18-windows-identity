@@ -17,6 +17,7 @@ using IISSite.Models;
 using System.DirectoryServices;
 using System.Web.Helpers;
 using Microsoft.SqlServer.Server;
+using System.Messaging;
 
 namespace IISSite
 {
@@ -748,6 +749,85 @@ namespace IISSite
                 BindFiles(fs);
                 BuildBreadcrumb(fs.ParentFileShare, fs.ActualPath);
             }
+        }
+
+        protected void msmqQueueSendMessage_Click(object sender, EventArgs e)
+        {
+            // check if queue exists, if not create it
+            MessageQueue msMq = null;
+            if (!MessageQueue.Exists(msmqQueueName.Text))
+            {
+                msMq = MessageQueue.Create(msmqQueueName.Text);
+            }
+            else
+            {
+                msMq = new MessageQueue(msmqQueueName.Text);
+            }
+            try
+            {
+                LogMessage logMessage = new LogMessage()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Created = DateTime.UtcNow,
+                    Message = msmqQueueMsg.Text,
+                    Name = Request.LogonUserIdentity.Name
+                };
+                msMq.Send(logMessage);
+            }
+            catch (MessageQueueException ee)
+            {
+                
+            }
+            catch (Exception eee)
+            {
+                
+            }
+            finally
+            {
+                msMq.Close();
+            }
+            Console.WriteLine("Message sent ......");
+            UpdateMsmqMessageCount();
+        }
+
+        void UpdateMsmqMessageCount()
+        {
+            MessageQueue msMq = new MessageQueue(msmqQueueName.Text, QueueAccessMode.Peek);
+            long messageCount = msMq.GetAllMessages().Length;
+            msmqQueueMsgCount.Text = messageCount.ToString();
+        }
+
+        protected void msmqQueueReadMessage_Click(object sender, EventArgs e)
+        {
+            MessageQueue msMq = new MessageQueue(msmqQueueName.Text);
+
+            try
+            {
+
+                // msMq.Formatter = new XmlMessageFormatter(new Type[] {typeof(string)});
+                msMq.Formatter = new XmlMessageFormatter(new Type[] { typeof(LogMessage) });
+                var message = (LogMessage)msMq.Receive().Body;
+                msmqQueueReadMsg.Text = Json.Encode(message);
+            }
+            catch (MessageQueueException ee)
+            {
+                Console.Write(ee.ToString());
+            }
+            catch (Exception eee)
+            {
+                Console.Write(eee.ToString());
+            }
+            finally
+            {
+                msMq.Close();
+            }
+            Console.WriteLine("Message received ......");
+            UpdateMsmqMessageCount();
+        }
+
+        protected void msmqQueueReadMessageCount_Click(object sender, EventArgs e)
+        {
+            UpdateMsmqMessageCount();
         }
 
         //protected void CreateRandomFile_Click(object sender, EventArgs e)

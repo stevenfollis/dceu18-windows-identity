@@ -56,6 +56,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Messaging" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -99,10 +100,12 @@
     <Compile Include="Helpers\FileShareHelper.cs" />
     <Compile Include="Helpers\LdapHelper.cs" />
     <Compile Include="Helpers\MsmqHelper.cs" />
+    <Compile Include="Helpers\Strings.cs" />
     <Compile Include="Helpers\UrlUtility.cs" />
     <Compile Include="Models\ADGroup.cs" />
     <Compile Include="Models\ADUser.cs" />
     <Compile Include="Models\FileShareItem.cs" />
+    <Compile Include="Models\LogMessage.cs" />
     <Compile Include="Modules\SecureFileHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Default.aspx.cs">

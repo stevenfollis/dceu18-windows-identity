@@ -229,6 +229,69 @@ namespace IISSite {
         protected global::System.Web.UI.WebControls.Label msmqTabError;
         
         /// <summary>
+        /// msmqQueueName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox msmqQueueName;
+        
+        /// <summary>
+        /// msmqQueueMsg control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox msmqQueueMsg;
+        
+        /// <summary>
+        /// msmqQueueSendMessage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button msmqQueueSendMessage;
+        
+        /// <summary>
+        /// msmqQueueMsgCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label msmqQueueMsgCount;
+        
+        /// <summary>
+        /// msmqQueueReadMessageCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button msmqQueueReadMessageCount;
+        
+        /// <summary>
+        /// msmqQueueReadMessage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button msmqQueueReadMessage;
+        
+        /// <summary>
+        /// msmqQueueReadMsg control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox msmqQueueReadMsg;
+        
+        /// <summary>
         /// fileShareMsgs control.
         /// </summary>
         /// <remarks>
