@@ -227,7 +227,7 @@
                                                         <div class="col-md-8">
                                                             <div class="well well-sm">
                                                                 <span class="ms-commandLink">
-                                                                    <asp:DataList ID="breadcrumbLinks" runat="server" RepeatDirection="Horizontal">
+                                                                    <asp:DataList ID="breadcrumbLinks" runat="server" RepeatDirection="Horizontal" Visible="false">
                                                                         <ItemTemplate>
                                                                             <a href='<%# DataBinder.Eval(Container.DataItem, "NavigateUrl") %>'><%# DataBinder.Eval(Container.DataItem, "Text") %></a>
                                                                         </ItemTemplate>
@@ -238,9 +238,9 @@
                                                                 </span>
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-4">
-                                                            <asp:Button CssClass="btn btn-primary btn-lg btn-block" ID="createRandomFile" Visible="false" runat="server" Text="Create Random File (Test)" OnClick="CreateRandomFile_Click" />
-                                                        </div>
+<%--                                                        <div class="col-md-4">
+                                                            <asp:Button CssClass="btn btn-primary btn-lg btn-block" ID="createRandomFile" Visible="true" runat="server" Text="Create Random File (Test)" OnClick="CreateRandomFile_Click" />
+                                                        </div>--%>
                                                     </div>
                                                     <asp:Repeater ID="fileShareList" runat="server" OnItemDataBound="FileShareList_ItemDataBound">
                                                         <HeaderTemplate>

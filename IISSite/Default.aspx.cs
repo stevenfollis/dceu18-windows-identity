@@ -22,9 +22,8 @@ namespace IISSite
 {
     public partial class Default : System.Web.UI.Page
     {
-       // private string fileShareRootPath;
+        public string fileShareRootPath { get; set; }
 
-        string fileShareRootPath = string.Empty;
         //string fileShareVirtualDirectory = string.Empty;
         //string currentPath = @"\";
         //string decodedVal = string.Empty;
@@ -286,10 +285,9 @@ namespace IISSite
 
                 FileShareItem rootFileShareItem = new FileShareItem()
                 {
-                    ParentFileShare = serverName,
+                    ParentFileShare = fileShareRootPath,
                     ActualPath = fileShareRootPath,
                     DisplayName = fileFolderName
-
                 };
 
                 fileShareMsgs.Items.Add("Binding folders");
@@ -392,9 +390,12 @@ namespace IISSite
                 directoryList.DataSource = curFolders;
                 directoryList.DataBind();
 
+                fileShareMsgs.Items.Add($"Bind files with {currentPath}");
+                BindFiles(fileShareItem);
+
                 //Build the breadcrumb for the page
                 fileShareMsgs.Items.Add($"Build breadcrumb with {currentPath}");
-                BuildBreadcrumb(fileShareRootPath, currentPath);
+                BuildBreadcrumb(fileShareItem.ParentFileShare, currentPath);
             }
             catch (System.Security.SecurityException)
             {
@@ -412,9 +413,10 @@ namespace IISSite
                 ToggleMessage($"BindFolders::Error::{ex.ToString()}", fileshareTabError);
             }
 }
+
         private void BindFiles(FileShareItem fileShareItem)
         {
-            string fileShareRootPath = fileShareItem.ActualPath;
+            //string fileShareRootPath = fileShareItem.ActualPath;
 
             DirectoryInfo currentDirectory = null;
             FileInfo[] curDirFiles = null;
@@ -435,7 +437,7 @@ namespace IISSite
                             {
                                 currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
                                 fileShareMsgs.Items.Add($"BindFiles::Checking for files in directory {currentDirectory}");
-                                if (System.IO.Directory.Exists(fileShareRootPath))
+                                if (System.IO.Directory.Exists(fileShareItem.ActualPath))
                                 {
                                     fileShareMsgs.Items.Add("BindFiles::Getting files");
                                     curDirFiles = currentDirectory.GetFiles();
@@ -458,6 +460,23 @@ namespace IISSite
                                 wCtx.Undo();
                             }
                         }
+                    }
+                }
+                else
+                {
+                    currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
+                    fileShareMsgs.Items.Add($"BindFiles::Checking for files in directory {currentDirectory}");
+                    if (System.IO.Directory.Exists(fileShareItem.ActualPath))
+                    {
+                        fileShareMsgs.Items.Add("BindFiles::Getting files");
+                        curDirFiles = currentDirectory.GetFiles();
+                        fileShareMsgs.Items.Add($"BindFiles::Found {curDirFiles?.Length.ToString()} files");
+                        fileList.DataSource = curDirFiles;
+                        fileList.DataBind();
+                    }
+                    else
+                    {
+                        fileShareMsgs.Items.Add("BindFiles::directory not found");
                     }
                 }
             }
@@ -483,17 +502,19 @@ namespace IISSite
         {
             //Remove the current root from the path and trim the extra backslashes
             fileShareMsgs.Items.Add($"BuildBreadcrumb::RootFileShare={RootFileShare} Relative path={relativeFileSharePath}");
-            string trimmedPath = relativeFileSharePath.Replace(RootFileShare, "").TrimStart('\\').TrimEnd('\\');
+            string trimmedPath = relativeFileSharePath.Replace(RootFileShare, "")?.TrimStart('\\')?.TrimEnd('\\');
             fileShareMsgs.Items.Add($"BuildBreadcrumb::trimmed path {trimmedPath}");
             //string trimmedPath = relativeFileSharePath.TrimStart('\\').TrimEnd('\\');
             string[] crumbPath = trimmedPath.Split('\\');
             List<HyperLink> links = new List<HyperLink>();
+
             HyperLink link = new HyperLink
             {
-                Text = trimmedPath,
-                NavigateUrl = UrlUtility.BuildShareUri(RootFileShare, relativeFileSharePath).ToString()
+                Text = RootFileShare,
+                NavigateUrl = UrlUtility.BuildFolderUri(RootFileShare).ToString()
             };
             links.Add(link);
+
             fileShareMsgs.Items.Add($"BuildBreadcrumb::Link1={link.NavigateUrl}");
             string curPathNode = string.Empty;
             StringBuilder curPath = new StringBuilder();
@@ -502,7 +523,7 @@ namespace IISSite
             for (int i = 0; i < crumbPath.Length; i++)
             {
                 currentNode = crumbPath[i];
-                fileShareMsgs.Items.Add($"BuildBreadcrumb::Current Node={currentNode}");
+                fileShareMsgs.Items.Add($"BuildBreadcrumb::Link {i.ToString()}={currentNode}");
                 if (i + 1 != crumbPath.Length)
                 {
                     link = new HyperLink
@@ -633,7 +654,51 @@ namespace IISSite
                 {
                     //Make the URL relative
                     //see if we have access to the sub folders. if not, do something
-                    try
+                    //Impersonate the current user to get the files to browse
+                    if (backendCallType.SelectedValue == "asuser")
+                    {
+                        ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
+                        if (currentUser != null)
+                        {
+                            fileShareMsgs.Items.Add($"BindFiles::Impersonating user {currentUser.UserPrincipalName}");
+                            WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
+
+                            using (WindowsImpersonationContext wCtx = wi.Impersonate())
+                            {
+                                try
+                                {
+
+                                    count.Text = currentFolder.EnumerateFileSystemInfos().Count().ToString();
+                                    folderName.Text = string.Format("<span class='glyphicon {0}'></span>&nbsp;<span class=''>{1}</span>", "glyphicon-ok-circle", currentFolder.Name);
+                                    FileShareItem fs = new FileShareItem()
+                                    {
+                                        ActualPath = currentFolder.FullName,
+                                        DisplayName = currentFolder.Name,
+                                        ParentFileShare = fileShareRootPath
+                                    };
+
+                                    if (currentFolder.GetDirectories().Length > 0)
+                                    {
+                                        //Folder has sub folders, enumerate those
+                                    }
+                                    folderName.CommandArgument = Json.Encode(fs);
+                                    folderName.CommandName = "listfiles";
+                                    created.Text = currentFolder.CreationTime.ToString();
+                                    lastModifed.Text = currentFolder.LastWriteTime.ToString();
+                                }
+                                catch
+                                {
+                                    //User does not have access to the file share.
+                                    folderName.Text = string.Format("<span class='glyphicon {0}'></span>&nbsp;<span class=''>{1}</span>", "glyphicon-ban-circle", currentFolder.Name);
+                                }
+                                finally
+                                {
+                                    wCtx.Undo();
+                                }
+                            }
+                        }
+                    }
+                    else
                     {
                         count.Text = currentFolder.EnumerateFileSystemInfos().Count().ToString();
                         folderName.Text = string.Format("<span class='glyphicon {0}'></span>&nbsp;<span class=''>{1}</span>", "glyphicon-ok-circle", currentFolder.Name);
@@ -652,11 +717,6 @@ namespace IISSite
                         folderName.CommandName = "listfiles";
                         created.Text = currentFolder.CreationTime.ToString();
                         lastModifed.Text = currentFolder.LastWriteTime.ToString();
-                    }
-                    catch
-                    {
-                        //User does not have access to the file share.
-                        folderName.Text = string.Format("<span class='glyphicon {0}'></span>&nbsp;<span class=''>{1}</span>", "glyphicon-ban-circle", currentFolder.Name);
                     }
                 }
             }
@@ -686,48 +746,44 @@ namespace IISSite
                 FileShareItem fs = Json.Decode<FileShareItem>(e.CommandArgument.ToString());
                 fileShareMsgs.Items.Add($"DirectoryList_ItemCommand::ListFiles {fs.ActualPath}");
                 BindFiles(fs);
-                BuildBreadcrumb(fileShareRootPath, fs.ActualPath);
+                BuildBreadcrumb(fs.ParentFileShare, fs.ActualPath);
             }
         }
 
-        protected void CreateRandomFile_Click(object sender, EventArgs e)
-        {
-            //setFileShareConfigContext();
-            //if (curFileShareConfig != null)
-            //{
-            //    //TODO: Validate this URL
-            //    //fileShareRootPath = curFileShareConfig.ActualPath;
-            //    fullFileSharePath = fileShareRootPath + currentPath;
+        //protected void CreateRandomFile_Click(object sender, EventArgs e)
+        //{
+        //    TODO: Validate this URL
+        //    fullFileSharePath = fileShareRootPath + currentPath;
 
-            //    //Impersonate the current user to get the files to browse
-            //    if (!String.IsNullOrEmpty(fullFileSharePath))
-            //    {
-            //        currentDirectory = new DirectoryInfo(fullFileSharePath);
-            //        if (System.IO.Directory.Exists(fullFileSharePath))
-            //        {
-            //            ClaimsPrincipal currentClaims = ClaimsPrincipal.Current;
-            //            Claim userUpn = currentClaims.Claims.FirstOrDefault(c => c.Type.ToString(CultureInfo.InvariantCulture) == ClaimTypes.Upn);
+        //    Impersonate the current user to get the files to browse
+        //    if (!String.IsNullOrEmpty(fullFileSharePath))
+        //    {
+        //        currentDirectory = new DirectoryInfo(fullFileSharePath);
+        //        if (System.IO.Directory.Exists(fullFileSharePath))
+        //        {
+        //            ClaimsPrincipal currentClaims = ClaimsPrincipal.Current;
+        //            Claim userUpn = currentClaims.Claims.FirstOrDefault(c => c.Type.ToString(CultureInfo.InvariantCulture) == ClaimTypes.Upn);
 
-            //            if (userUpn != null)
-            //            {
-            //                WindowsIdentity wi = new WindowsIdentity(userUpn.Value);
-            //                using (WindowsImpersonationContext wCtx = wi.Impersonate())
-            //                {
-            //                    try
-            //                    {
-            //                        System.IO.File.CreateText(currentDirectory.FullName + "\\" + Path.GetRandomFileName());
-            //                        wCtx.Undo();
-            //                    }
-            //                    catch (System.UnauthorizedAccessException)
-            //                    {
-            //                        //Do something with this error
-            //                    }
-            //                }
-            //                //Rebind the UI
-            //                bindFiles(userUpn);
-            //            }
-            //        }
-            //    }
-        }
+        //            if (userUpn != null)
+        //            {
+        //                WindowsIdentity wi = new WindowsIdentity(userUpn.Value);
+        //                using (WindowsImpersonationContext wCtx = wi.Impersonate())
+        //                {
+        //                    try
+        //                    {
+        //                        System.IO.File.CreateText(currentDirectory.FullName + "\\" + Path.GetRandomFileName());
+        //                        wCtx.Undo();
+        //                    }
+        //                    catch (System.UnauthorizedAccessException)
+        //                    {
+        //                        Do something with this error
+        //                    }
+        //                }
+        //                Rebind the UI
+        //                bindFiles(userUpn);
+        //            }
+        //        }
+        //    }
+        //}
     }
 }
