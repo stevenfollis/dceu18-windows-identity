@@ -49,15 +49,6 @@ namespace IISSite {
         protected global::System.Web.UI.WebControls.RadioButtonList backendCallType;
         
         /// <summary>
-        /// errLabel control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label errLabel;
-        
-        /// <summary>
         /// claimsTabError control.
         /// </summary>
         /// <remarks>
@@ -92,6 +83,15 @@ namespace IISSite {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DataGrid userGroupsGrid;
+        
+        /// <summary>
+        /// dbMessages control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ListBox dbMessages;
         
         /// <summary>
         /// databaseTabErrorPanel control.
@@ -157,15 +157,6 @@ namespace IISSite {
         protected global::System.Web.UI.WebControls.Panel sqlResults;
         
         /// <summary>
-        /// dbConnString control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label dbConnString;
-        
-        /// <summary>
         /// sqlDataGrid control.
         /// </summary>
         /// <remarks>
@@ -173,6 +164,15 @@ namespace IISSite {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DataGrid sqlDataGrid;
+        
+        /// <summary>
+        /// ldapMessages control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ListBox ldapMessages;
         
         /// <summary>
         /// ldapTabError control.
@@ -227,6 +227,15 @@ namespace IISSite {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label msmqTabError;
+        
+        /// <summary>
+        /// fileShareMsgs control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ListBox fileShareMsgs;
         
         /// <summary>
         /// fileshareTabError control.

@@ -27,20 +27,20 @@ namespace IISSite.Helpers
             return newFileUri.Uri;
         }
 
-        public static Uri BuildFolderUri(string fullFolderName, string rootFileShare)
+        public static Uri BuildFolderUri(string rootFileShare)
         {
-            string relativePath = fullFolderName.Replace(rootFileShare, "");
+            //string relativePath = fullFolderName.Replace(rootFileShare, "");
             UriBuilder folderUri = new UriBuilder();
             folderUri.Scheme = HttpContext.Current.Request.Url.Scheme;
             folderUri.Host = HttpContext.Current.Request.Url.Host;
             folderUri.Port = HttpContext.Current.Request.Url.Port;
             folderUri.Path = HttpContext.Current.Request.Url.AbsolutePath;
-            string folderQString = string.Format("{0}&{1}={2}&{3}={4}", getCleanQueryString(), QSTRINGSOURCE, HttpContext.Current.Server.UrlEncode(rootFileShare), QSTRINGPATH, HttpContext.Current.Server.UrlEncode(relativePath));
+            string folderQString = string.Format("{0}&{1}={2}", getCleanQueryString(), QSTRINGPATH, HttpContext.Current.Server.UrlEncode(rootFileShare));
             folderUri.Query = folderQString;
             return folderUri.Uri;
         }
 
-        public static Uri BuildShareUri(string ShareDisplayName)
+        public static Uri BuildShareUri(string rootFileShare, string ShareDisplayName)
         {
             //Make the URL relative
             UriBuilder fileShareUri = new UriBuilder();
@@ -48,7 +48,7 @@ namespace IISSite.Helpers
             fileShareUri.Host = HttpContext.Current.Request.Url.Host;
             fileShareUri.Port = HttpContext.Current.Request.Url.Port;
             fileShareUri.Path = HttpContext.Current.Request.Url.AbsolutePath;
-            string fileQString = string.Format("{0}&{1}={2}", getCleanQueryString(), QSTRINGSOURCE, HttpContext.Current.Server.UrlEncode(ShareDisplayName));
+            string fileQString = string.Format("{0}&{1}={2}", getCleanQueryString(), QSTRINGPATH, HttpContext.Current.Server.UrlEncode(ShareDisplayName));
             fileShareUri.Query = fileQString;
             return fileShareUri.Uri;
         }

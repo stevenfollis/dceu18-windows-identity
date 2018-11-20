@@ -56,16 +56,6 @@
             </div>
         </section>
         <div class="row">
-            <div class="col-md-12">
-                <p>
-                    <asp:Label ID="errLabel" CssClass="bg-danger" runat="server" Visible="false"></asp:Label>
-                </p>
-                <p>
-                    ERRORS GO HERE
-                </p>
-            </div>
-        </div>
-        <div class="row">
             <div class="col-lg-12">
                 <div>
                     <ul class="nav nav-pills mb-3 nav-tabs" id="pills-tab" role="tablist">
@@ -129,9 +119,14 @@
                         <div class="tab-pane fade" id="pills-data" role="tabpanel" aria-labelledby="pills-data-tab">
                             <asp:UpdatePanel runat="server" RenderMode="Inline" UpdateMode="Conditional" ValidateRequestMode="Disabled">
                                 <ContentTemplate>
-                                    <asp:panel ID="databaseTabErrorPanel" CssClass="alert alert-danger" runat="server">
-                                        <asp:Label ID="databaseTabError" runat="server" Visible="false"></asp:Label>
-                                    </asp:panel>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <asp:ListBox ID="dbMessages" runat="server" Visible="true"></asp:ListBox>
+                                        </div>
+                                        <asp:Panel ID="databaseTabErrorPanel" CssClass="alert alert-danger" runat="server">
+                                            <asp:Label ID="databaseTabError" runat="server" Visible="false"></asp:Label>
+                                        </asp:Panel>
+                                    </div>
                                     <div class="form-group">
                                         <label for="dbServerName">Server Name</label>
                                         <asp:TextBox runat="server" CssClass="form-control" ID="dbServerName" placeholder="Enter Servername" />
@@ -148,10 +143,6 @@
                                     <div class="card">
                                         <div class="card-body">
                                             <asp:Panel ID="sqlResults" runat="server" Visible="false">
-                                                <p>
-                                                    Testing Connection to database using connection String:
-                                                        <asp:Label ID="dbConnString" runat="server"></asp:Label>
-                                                </p>
                                                 <asp:DataGrid ID="sqlDataGrid" AutoGenerateColumns="true" runat="server" CssClass="table table-striped table-bordered table-condensed table-responsive">
                                                 </asp:DataGrid>
                                             </asp:Panel>
@@ -165,8 +156,13 @@
                                 <div class="card-body">
                                     <asp:UpdatePanel runat="server" RenderMode="Inline" UpdateMode="Conditional" ValidateRequestMode="Disabled">
                                         <ContentTemplate>
-                                            <div class="alert alert-danger">
-                                                <asp:Label ID="ldapTabError" runat="server" Visible="false"></asp:Label>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <asp:ListBox ID="ldapMessages" runat="server" Visible="true"></asp:ListBox>
+                                                </div>
+                                                <div class="alert alert-danger">
+                                                    <asp:Label ID="ldapTabError" runat="server" Visible="false"></asp:Label>
+                                                </div>
                                             </div>
                                             <div class="form-group">
                                                 <label for="ldapDomainname">Domain/Forest Name</label>
@@ -206,8 +202,13 @@
                                 <div class="card-body">
                                     <asp:UpdatePanel runat="server" RenderMode="Inline" UpdateMode="Conditional" ValidateRequestMode="Disabled">
                                         <ContentTemplate>
-                                            <div>
-                                                <asp:Label ID="fileshareTabError" CssClass="bg-danger" runat="server" Visible="false"></asp:Label>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <asp:ListBox ID="fileShareMsgs" runat="server" Visible="true"></asp:ListBox>
+                                                </div>
+                                                <div class="alert alert-danger">
+                                                    <asp:Label ID="fileshareTabError" CssClass="bg-danger" runat="server" Visible="false"></asp:Label>
+                                                </div>
                                             </div>
                                             <div>
                                                 <div class="form-group">

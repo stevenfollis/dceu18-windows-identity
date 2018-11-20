@@ -24,7 +24,7 @@ namespace IISSite
     {
        // private string fileShareRootPath;
 
-        //string fileShareRootPath = string.Empty;
+        string fileShareRootPath = string.Empty;
         //string fileShareVirtualDirectory = string.Empty;
         //string currentPath = @"\";
         //string decodedVal = string.Empty;
@@ -40,7 +40,6 @@ namespace IISSite
             if (!Page.IsPostBack)
             {
                 //ShowData.Attributes["class"] = "btn btn-link collapsed";
-                ToggleError();
                 BindUserData();
                 BindClaimsTab();
                 BindGroupsTab();
@@ -62,7 +61,6 @@ namespace IISSite
                     SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder(connString);
                     dbServerName.Text = sqlConnectionString.DataSource;
                     dbDatabaseName.Text = sqlConnectionString.InitialCatalog;
-                    dbConnString.Text = sqlConnectionString.ToString();
                 }
                 catch
                 {
@@ -99,20 +97,15 @@ namespace IISSite
             }
         }
 
-        private void ToggleError(string p, Label errorControl)
+        private void ToggleMessage(string msg, Label messageControl, bool isError = false, bool display = false)
         {
-            if (errorControl != null)
+            if (messageControl != null)
             {
-                errorControl.Text = p;
-                errorControl.Visible = true;
+                messageControl.Text = msg;
+                messageControl.Visible = display;
             }
         }
 
-        private void ToggleError()
-        {
-            errLabel.Text = string.Empty;
-            errLabel.Visible = false;
-        }
         private void BindClaimsTab()
         {
             try
@@ -146,7 +139,7 @@ namespace IISSite
             }
             catch (Exception ex)
             {
-                ToggleError($"BindClaimsTab::Error{ex.ToString()}", claimsTabError);
+                ToggleMessage($"BindClaimsTab::Error{ex.ToString()}", claimsTabError);
             }
         }
 
@@ -161,14 +154,15 @@ namespace IISSite
             }
             catch (Exception gex)
             {
-                ToggleError($"BindGroupsTab::{gex.ToString()}", winPrincipalTabError);
+                ToggleMessage($"BindGroupsTab::{gex.ToString()}", winPrincipalTabError);
             }
         }
 
         protected void GetSQLData_Click(object sender, EventArgs e)
         {
             // Open the connection.
-            ToggleError("", databaseTabError);
+            ToggleMessage("", databaseTabError);
+            dbMessages.Items.Clear();
             //string sqlQuery = "SELECT TOP 1000 [Id],[ParentCategoryId],[Path],[Name],[NumActiveAds] FROM [Classifieds].[dbo].[Categories]";
             string sqlQuery = dbQuery.Text;
 
@@ -182,11 +176,13 @@ namespace IISSite
                     //Authentication = SqlAuthenticationMethod.ActiveDirectoryIntegrated,
                     TrustServerCertificate = true
                 };
+
+                dbMessages.Items.Add($"Connecting to [{sqlConnectionString.ToString()}] {backendCallType.SelectedValue}");
+
                 DataSet ds = new DataSet();
+                DataTable dt = new DataTable();
                 SqlConnection dbConnection = null;
                 SqlDataAdapter dataadapter = null;
-                dbConnection = new SqlConnection(sqlConnectionString.ToString());
-                dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
 
                 if (backendCallType.SelectedValue == "asuser")
                 {
@@ -194,26 +190,55 @@ namespace IISSite
                     ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
                     if (currentUser != null)
                     {
-                        WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
-                        using (WindowsImpersonationContext wCtx = wi.Impersonate())
+                        dbMessages.Items.Add($"Connecting as {currentUser.UserPrincipalName}");
+                        //WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
+                        //using (WindowsImpersonationContext wCtx = wi.Impersonate())
+                        //{
+                        //    // Run the SQL statement, and then get the returned rows to the DataReader.
+                        //    dbConnection.Open();
+                        //    wCtx.Undo();
+                        //}
+                        using (WindowsImpersonationContext wi = ImpersonateEndUser(currentUser.UserPrincipalName))
                         {
-                            // Run the SQL statement, and then get the returned rows to the DataReader.
-                            dbConnection.Open();
-                            wCtx.Undo();
+                            try
+                            {
+                                dbMessages.Items.Add("Impersonating");
+                                dbConnection = new SqlConnection(sqlConnectionString.ToString());
+                                dbMessages.Items.Add("Opening DB");
+                                dbConnection.Open();
+                                dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
+                                dbMessages.Items.Add("Running query");
+                                dataadapter.Fill(ds, "data");
+                                dbMessages.Items.Add("Disabling impersonation");
+                            }
+                            catch (Exception ex)
+                            {
+                                dbMessages.Items.Add("Error");
+                                ToggleMessage($"GetSQLData_Click::Could not get data {ex.ToString()}", databaseTabError, true);
+                            }
+                            finally
+                            {
+                                wi.Undo();
+                            }
                         }
                     }
                     else
                     {
-                        ToggleError("GetSQLData_Click::Could not bind AD User", databaseTabError);
+                        dbMessages.Items.Add($"ERROR: {Request.LogonUserIdentity.Name} not found. Check UPN");
+                        ToggleMessage("GetSQLData_Click::Could not bind AD User", databaseTabError);
                     }
                 }
                 else
                 {
                     // Run the SQL statement, and then get the returned rows to the DataReader.
+                    dbConnection = new SqlConnection(sqlConnectionString.ToString());
+                    dbMessages.Items.Add("Opening DB");
                     dbConnection.Open();
+                    dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
+                    dbMessages.Items.Add("Fetching data");
+                    dataadapter.Fill(ds, "data");
                 }
 
-                dataadapter.Fill(ds, "data");
                 dbConnection.Close();
                 sqlDataGrid.DataSource = ds.Tables["data"].DefaultView;
                 sqlDataGrid.DataBind();
@@ -221,22 +246,44 @@ namespace IISSite
             }
             catch (Exception sqlex)
             {
-                ToggleError($"GetSQLData_Click::{sqlex.ToString()}", databaseTabError);
+                ToggleMessage($"GetSQLData_Click::{sqlex.ToString()}", databaseTabError);
                 sqlResults.Visible = false;
             }
         }
 
+        private WindowsImpersonationContext ImpersonateEndUser(string userUpn)
+        {
+            // Obtain the user name (from forms authentication)
+            //string identity = User.Identity.Name;
+
+            // Convert from domainName\userName format to userName@domainName format
+            // if necessary
+            //int slash = identity.IndexOf("\\");
+            //if (slash > 0)
+            //{
+            //    string domain = identity.Substring(0, slash);
+            //    string user = identity.Substring(slash + 1);
+            //    identity = user + "@" + domain;
+            //}
+
+            // The WindowsIdentity(string) constructor uses the new
+            // Kerberos S4U extension to get a logon for the user
+            // without a password.
+            WindowsIdentity wi = new WindowsIdentity(userUpn);
+            return wi.Impersonate();
+        }
+
         protected void FileShareBind_Click(object sender, EventArgs e)
         {
-            //ClaimsIdentity currentClaims = Request.LogonUserIdentity;
-            //Claim upnClaim = currentClaims.Claims.FirstOrDefault(c => c.Type.ToString(CultureInfo.InvariantCulture) == ClaimTypes.Upn);
-            //if (upnClaim != null)
-            //{ 
+            fileShareMsgs.Items.Clear();
+
             try
             {
                 string serverName = fileShareServerName.Text;
                 string fileFolderName = fileShareName.Text;
-                string fileShareRootPath = $@"\\{serverName}\{fileFolderName}";
+                fileShareRootPath = $@"\\{serverName}\{fileFolderName}";
+                fileShareMsgs.Items.Add($"Fetching files from {fileShareRootPath}");
+
                 FileShareItem rootFileShareItem = new FileShareItem()
                 {
                     ParentFileShare = serverName,
@@ -245,74 +292,89 @@ namespace IISSite
 
                 };
 
+                fileShareMsgs.Items.Add("Binding folders");
                 BindFolders(rootFileShareItem);
 
+                fileShareMsgs.Items.Add("Binding files");
                 BindFiles(rootFileShareItem);
             }
             catch(Exception ex)
             {
-                ToggleError($"FileShareBind_Click::Error::{ex.ToString()}", fileshareTabError);
+                ToggleMessage($"FileShareBind_Click::Error::{ex.ToString()}", fileshareTabError);
             }
-            //}
-            //else
-            //{
-            //    toggleError("No UPN");
-            //}
         }
 
         private void BindFolders(FileShareItem fileShareItem)
         {
-            string fileShareRootPath = fileShareItem.ActualPath;
-
-            //string fileShareVirtualDirectory = string.Empty;
-            //string currentPath = @"\";
-            //string decodedVal = string.Empty;
-            //string fileShareConfigId = string.Empty;
+            string currentPath = fileShareItem.ActualPath;
             DirectoryInfo currentDirectory = null;
             DirectoryInfo[] curFolders = null;
             DirectoryInfo currentParent = null;
 
+            fileShareMsgs.Items.Add($"BindFolders::{currentPath}");
             try
             {
                 //Impersonate the current user to get the files to browse
                 if (backendCallType.SelectedValue == "asuser")
                 {
                     ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
-                    WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
-                    using (WindowsImpersonationContext wCtx = wi.Impersonate())
+                    if (currentUser != null)
                     {
-                        currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
-                        if (System.IO.Directory.Exists(fileShareRootPath))
+                        fileShareMsgs.Items.Add($"BindFolders::Impersonating user {currentUser.UserPrincipalName}");
+                        WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
+
+                        using (WindowsImpersonationContext wCtx = wi.Impersonate())
                         {
-                            curFolders = currentDirectory.GetDirectories();
-                            //if there are no children and we are not at the root, show parents
-                            if (currentDirectory.Parent != null)
+                            try
                             {
-                                if (currentDirectory.Parent.FullName == fileShareRootPath)
+                                currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
+                                fileShareMsgs.Items.Add($"Current directory is {fileShareItem.ActualPath}");
+                                if (System.IO.Directory.Exists(currentPath))
                                 {
-                                    //We are at the root
-                                    currentParent = currentDirectory;
+                                    fileShareMsgs.Items.Add("Path exists, get directories");
+                                    curFolders = currentDirectory.GetDirectories();
+                                    //if there are no children and we are not at the root, show parents
+                                    if (currentDirectory.Parent != null)
+                                    {
+                                        if (currentDirectory.Parent.FullName == currentPath)
+                                        {
+                                            //We are at the root
+                                            currentParent = currentDirectory;
+                                            fileShareMsgs.Items.Add($"Current is root {currentParent}");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //We are at the root
+                                        currentParent = currentDirectory;
+                                        fileShareMsgs.Items.Add($"At the root. Set the parent to {currentParent}");
+                                    }
                                 }
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                //We are at the root
-                                currentParent = currentDirectory;
+                                fileShareMsgs.Items.Add("Error");
+                            }
+                            finally
+                            {
+                                fileShareMsgs.Items.Add("Undoing impersonation");
+                                wCtx.Undo();
                             }
                         }
-                        wCtx.Undo();
                     }
                 }
                 else
                 {
                     currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
-                    if (System.IO.Directory.Exists(fileShareRootPath))
+                    fileShareMsgs.Items.Add($"Looking for directory {currentDirectory}");
+                    if (System.IO.Directory.Exists(currentPath))
                     {
+                        fileShareMsgs.Items.Add("Path exists, get sub directories");
                         curFolders = currentDirectory.GetDirectories();
                         //if there are no children and we are not at the root, show parents
                         if (currentDirectory.Parent != null)
                         {
-                            if (currentDirectory.Parent.FullName == fileShareRootPath)
+                            if (currentDirectory.Parent.FullName == currentPath)
                             {
                                 //We are at the root
                                 currentParent = currentDirectory;
@@ -326,24 +388,28 @@ namespace IISSite
                     }
                 }
 
-
+                fileShareMsgs.Items.Add($"Bind folders {curFolders?.Length.ToString()}");
                 directoryList.DataSource = curFolders;
                 directoryList.DataBind();
 
                 //Build the breadcrumb for the page
-                BuildBreadcrumb(fileShareRootPath, fileShareRootPath);
+                fileShareMsgs.Items.Add($"Build breadcrumb with {currentPath}");
+                BuildBreadcrumb(fileShareRootPath, currentPath);
             }
             catch (System.Security.SecurityException)
             {
-                ToggleError("BindFolders::Error SecurityException", fileshareTabError);
+                fileShareMsgs.Items.Add("ERROR Security exception");
+                ToggleMessage("BindFolders::Error SecurityException", fileshareTabError);
             }
             catch (System.UnauthorizedAccessException)
             {
-                ToggleError("BindFolders::Error Unauthorized", fileshareTabError);
+                fileShareMsgs.Items.Add("ERROR Unauthorized exception");
+                ToggleMessage("BindFolders::Error Unauthorized", fileshareTabError);
             }
             catch (Exception ex)
             {
-                ToggleError($"BindFolders::Error::{ex.ToString()}", fileshareTabError);
+                fileShareMsgs.Items.Add("ERROR");
+                ToggleMessage($"BindFolders::Error::{ex.ToString()}", fileshareTabError);
             }
 }
         private void BindFiles(FileShareItem fileShareItem)
@@ -353,80 +419,101 @@ namespace IISSite
             DirectoryInfo currentDirectory = null;
             FileInfo[] curDirFiles = null;
 
-            //if (userUpn != null)
-            //{
             try
             {
                 //Impersonate the current user to get the files to browse
-                //WindowsIdentity wi = new WindowsIdentity(userUpn.Value);
-                //using (WindowsImpersonationContext wCtx = wi.Impersonate())
-                //{
-                currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
-                if (System.IO.Directory.Exists(fileShareRootPath))
+                if (backendCallType.SelectedValue == "asuser")
                 {
-                    curDirFiles = currentDirectory.GetFiles();
-
-                    fileList.DataSource = curDirFiles;
-                    fileList.DataBind();
-                }
-                else
-                {
-                    //The configured directory does not exist or is invalid
-                    //}
+                    ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
+                    if (currentUser != null)
+                    {
+                        fileShareMsgs.Items.Add($"BindFiles::Impersonating user {currentUser.UserPrincipalName}");
+                        WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
+                        using (WindowsImpersonationContext wCtx = wi.Impersonate())
+                        {
+                            try
+                            {
+                                currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
+                                fileShareMsgs.Items.Add($"BindFiles::Checking for files in directory {currentDirectory}");
+                                if (System.IO.Directory.Exists(fileShareRootPath))
+                                {
+                                    fileShareMsgs.Items.Add("BindFiles::Getting files");
+                                    curDirFiles = currentDirectory.GetFiles();
+                                    fileShareMsgs.Items.Add($"BindFiles::Found {curDirFiles?.Length.ToString()} files");
+                                    fileList.DataSource = curDirFiles;
+                                    fileList.DataBind();
+                                }
+                                else
+                                {
+                                    fileShareMsgs.Items.Add("BindFiles::directory not found");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                fileShareMsgs.Items.Add("BindFiles::Error");
+                            }
+                            finally
+                            {
+                                fileShareMsgs.Items.Add("BindFiles::Undo impersonation");
+                                wCtx.Undo();
+                            }
+                        }
+                    }
                 }
             }
             catch (System.Security.SecurityException)
             {
-                ToggleError("BindFiles::Error SecurityException", fileshareTabError);
+                fileShareMsgs.Items.Add("BindFiles::Security exception");
+                ToggleMessage("BindFiles::Error SecurityException", fileshareTabError);
             }
             catch (System.UnauthorizedAccessException)
             {
-                ToggleError("BindFiles::Error Unauthorized", fileshareTabError);
+                fileShareMsgs.Items.Add("BindFiles::Unauthorized");
+                ToggleMessage("BindFiles::Error Unauthorized", fileshareTabError);
             }
             catch (Exception ex)
             {
-                ToggleError($"BindFiles::Error::{ex.ToString()}", fileshareTabError);
+                fileShareMsgs.Items.Add("BindFiles::Error");
+                ToggleMessage($"BindFiles::Error::{ex.ToString()}", fileshareTabError);
             }
             //}
         }
 
-        public void BuildBreadcrumb(string relativeFileSharePath, string RootFileShare)
+        public void BuildBreadcrumb(string RootFileShare, string relativeFileSharePath)
         {
             //Remove the current root from the path and trim the extra backslashes
+            fileShareMsgs.Items.Add($"BuildBreadcrumb::RootFileShare={RootFileShare} Relative path={relativeFileSharePath}");
             string trimmedPath = relativeFileSharePath.Replace(RootFileShare, "").TrimStart('\\').TrimEnd('\\');
+            fileShareMsgs.Items.Add($"BuildBreadcrumb::trimmed path {trimmedPath}");
+            //string trimmedPath = relativeFileSharePath.TrimStart('\\').TrimEnd('\\');
             string[] crumbPath = trimmedPath.Split('\\');
-            //HyperLink breadCrumbSepChar = new HyperLink() { NavigateUrl = "#", Text = "/" };
             List<HyperLink> links = new List<HyperLink>();
             HyperLink link = new HyperLink
             {
-                Text = RootFileShare,
-                NavigateUrl = UrlUtility.BuildShareUri(RootFileShare).ToString()
+                Text = trimmedPath,
+                NavigateUrl = UrlUtility.BuildShareUri(RootFileShare, relativeFileSharePath).ToString()
             };
             links.Add(link);
-            Label sepChar;
+            fileShareMsgs.Items.Add($"BuildBreadcrumb::Link1={link.NavigateUrl}");
             string curPathNode = string.Empty;
             StringBuilder curPath = new StringBuilder();
             string currentNode = string.Empty;
 
-            curPath.Append(@"\");
             for (int i = 0; i < crumbPath.Length; i++)
             {
                 currentNode = crumbPath[i];
-
+                fileShareMsgs.Items.Add($"BuildBreadcrumb::Current Node={currentNode}");
                 if (i + 1 != crumbPath.Length)
                 {
-                    sepChar = new Label();
-                    HyperLink breadCrumbSepChar = new HyperLink() { NavigateUrl = "#", Text = "/" };
-                    links.Add(breadCrumbSepChar);
                     link = new HyperLink
                     {
                         Text = currentNode
                     };
                     curPath.Append(currentNode);
-                    curPath.Append(@"\");
-                    link.NavigateUrl = UrlUtility.BuildFolderUri(curPath.ToString(), RootFileShare).ToString();
+                    link.NavigateUrl = UrlUtility.BuildFolderUri(curPath.ToString()).ToString();
                     links.Add(link);
                 }
+                fileShareMsgs.Items.Add($"BuildBreadcrumb::Link={link.NavigateUrl}");
                 curPathNode = currentNode;
             }
 
@@ -434,17 +521,14 @@ namespace IISSite
             //If we are at the root, the trimmed path will be empty, dont add a >
             if (!string.IsNullOrEmpty(trimmedPath))
             {
-                //Add the last node
-                sepChar = new Label();
-                HyperLink breadCrumbSepChar = new HyperLink() { NavigateUrl = "#", Text = "/" };
-                links.Add(breadCrumbSepChar);
                 HyperLink lastNode = new HyperLink() {
                    Text = curPathNode,
                    NavigateUrl = "#"
                 };
                 links.Add(lastNode);
             }
-            
+
+            fileShareMsgs.Items.Add($"BuildBreadcrumb::Bind {links.Count.ToString()} links");
             breadcrumbLinks.DataSource = links;
             breadcrumbLinks.DataBind();
         }
@@ -491,7 +575,7 @@ namespace IISSite
             }
             catch (Exception ex)
             {
-                ToggleError(ex.ToString(), ldapTabError);
+                ToggleMessage(ex.ToString(), ldapTabError);
             }
         }
 
@@ -586,8 +670,9 @@ namespace IISSite
             {
                 curFileShare = (FileShareItem)e.Item.DataItem;
                 curLink = e.Item.FindControl("fileShareUrl") as HyperLink;
-                curLink.NavigateUrl = UrlUtility.BuildShareUri(curFileShare.DisplayName).ToString();
+                curLink.NavigateUrl = UrlUtility.BuildShareUri(curFileShare.ActualPath, curFileShare.DisplayName).ToString();
                 curLink.Text = curFileShare.DisplayName;
+                fileShareMsgs.Items.Add($"DirectoryList_ItemCommand::ListFiles {curFileShare.ActualPath}");
             }
         }
 
@@ -599,7 +684,9 @@ namespace IISSite
                 var value = e.CommandArgument;
                 // Do whatever operation you want.  
                 FileShareItem fs = Json.Decode<FileShareItem>(e.CommandArgument.ToString());
+                fileShareMsgs.Items.Add($"DirectoryList_ItemCommand::ListFiles {fs.ActualPath}");
                 BindFiles(fs);
+                BuildBreadcrumb(fileShareRootPath, fs.ActualPath);
             }
         }
 
