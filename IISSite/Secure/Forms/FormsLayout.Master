@@ -32,8 +32,5 @@
         <asp:ContentPlaceHolder ID="MainBody" runat="server">
         </asp:ContentPlaceHolder>
     </div>
-    <footer class="bg-dark">
-        Footer content
-    </footer>
 </body>
 </html>
