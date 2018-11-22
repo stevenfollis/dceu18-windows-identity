@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace IISSite.Helpers
+namespace IISSite.Common.Helpers
 {
     public static class Strings
     {

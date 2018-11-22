@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Messaging;
 using System.Net;
 using Microsoft.Win32;
 
-namespace IISSite.Helpers
+namespace IISSite.Common.Helpers
 {
     public class MsmqHelper
     {

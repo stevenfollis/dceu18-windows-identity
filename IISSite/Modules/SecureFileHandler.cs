@@ -12,8 +12,8 @@ using System.Web.Configuration;
 using System.Security.Claims;
 using System.Globalization;
 using System.IdentityModel.Tokens;
-using IISSite.Models;
-using IISSite.Helpers;
+using IISSite.Common.Models;
+using IISSite.Common.Helpers;
 
 namespace IISSite.Modules
 {

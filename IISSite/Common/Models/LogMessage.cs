@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
-namespace IISSite.Models
+namespace IISSite.Common.Models
 {
     [Serializable]
     public class LogMessage

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.DirectoryServices.ActiveDirectory;
-using System.Linq;
+﻿using System.DirectoryServices.ActiveDirectory;
 using System.Security.Principal;
-using System.Web;
 
-namespace IISSite.Models
+namespace IISSite.Common.Models
 {
     public class ADUser
     {

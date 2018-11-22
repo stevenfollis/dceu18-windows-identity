@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.DirectoryServices;
@@ -11,27 +10,371 @@ using System.Messaging;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
-using System.Web.Helpers;
+using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using IISSite.Common.Helpers;
 using IISSite.Common.Models;
+using Newtonsoft.Json;
 
-namespace IISSite
+namespace IISSite.Pages.Secure.IWA
 {
-    public partial class Default : System.Web.UI.Page
+    public class Default : System.Web.UI.Page
     {
-        public string FileShareRootPath { get; set; }
+        #region "WebControls"
+        /// <summary>
+        /// loginName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label loginName;
 
-        //string fileShareVirtualDirectory = string.Empty;
-        //string currentPath = @"\";
-        //string decodedVal = string.Empty;
-        //string fileShareConfigId = string.Empty;
-        //DirectoryInfo currentDirectory = null;
-        //DirectoryInfo[] curFolders = null;
-        //FileInfo[] curDirFiles = null;
-        //DirectoryInfo currentParent = null;
-        //string FileSharePath = string.Empty;
+        /// <summary>
+        /// UserSourceLocation control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label UserSourceLocation;
+
+        /// <summary>
+        /// backendCallType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButtonList backendCallType;
+
+        /// <summary>
+        /// claimsTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label claimsTabError;
+
+        /// <summary>
+        /// claimsGrid control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DataGrid claimsGrid;
+
+        /// <summary>
+        /// winPrincipalTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label winPrincipalTabError;
+
+        /// <summary>
+        /// userGroupsGrid control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DataGrid userGroupsGrid;
+
+        /// <summary>
+        /// dbMessages control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ListBox dbMessages;
+
+        /// <summary>
+        /// databaseTabErrorPanel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel databaseTabErrorPanel;
+
+        /// <summary>
+        /// databaseTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label databaseTabError;
+
+        /// <summary>
+        /// dbServerName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox dbServerName;
+
+        /// <summary>
+        /// dbDatabaseName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox dbDatabaseName;
+
+        /// <summary>
+        /// dbQuery control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox dbQuery;
+
+        /// <summary>
+        /// GetData control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button GetData;
+
+        /// <summary>
+        /// sqlResults control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel sqlResults;
+
+        /// <summary>
+        /// sqlDataGrid control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DataGrid sqlDataGrid;
+
+        /// <summary>
+        /// ldapMessages control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ListBox ldapMessages;
+
+        /// <summary>
+        /// ldapTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label ldapTabError;
+
+        /// <summary>
+        /// ldapDomainname control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox ldapDomainname;
+
+        /// <summary>
+        /// ldapUsersOrGroups control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButtonList ldapUsersOrGroups;
+
+        /// <summary>
+        /// ldapBind control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button ldapBind;
+
+        /// <summary>
+        /// ldapDataGrid control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DataGrid ldapDataGrid;
+
+        /// <summary>
+        /// msmqTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label msmqTabError;
+
+        /// <summary>
+        /// msmqQueueName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox msmqQueueName;
+
+        /// <summary>
+        /// msmqQueueMsg control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox msmqQueueMsg;
+
+        /// <summary>
+        /// msmqQueueSendMessage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button msmqQueueSendMessage;
+
+        /// <summary>
+        /// msmqQueueMsgCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label msmqQueueMsgCount;
+
+        /// <summary>
+        /// msmqQueueReadMessageCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button msmqQueueReadMessageCount;
+
+        /// <summary>
+        /// msmqQueueReadMessage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button msmqQueueReadMessage;
+
+        /// <summary>
+        /// msmqQueueReadMsg control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox msmqQueueReadMsg;
+
+        /// <summary>
+        /// fileShareMsgs control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ListBox fileShareMsgs;
+
+        /// <summary>
+        /// fileshareTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label fileshareTabError;
+
+        /// <summary>
+        /// fileShareServerName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox fileShareServerName;
+
+        /// <summary>
+        /// fileShareName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox fileShareName;
+
+        /// <summary>
+        /// fileShareBind control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button fileShareBind;
+
+        /// <summary>
+        /// breadcrumbLinks control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DataList breadcrumbLinks;
+
+        /// <summary>
+        /// fileShareList control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater fileShareList;
+
+        /// <summary>
+        /// directoryList control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater directoryList;
+
+        /// <summary>
+        /// fileList control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater fileList;
+
+        public string FileShareRootPath { get; private set; }
+        #endregion
 
         protected override void OnLoad(EventArgs e)
         {
@@ -41,74 +384,14 @@ namespace IISSite
                 BindUserData();
                 BindClaimsTab();
                 BindGroupsTab();
-                BindSqlTab();
-                BindLdapTab();
-                BindMsmqTab();
-                BindFileshareTab();
             }
         }
 
-        private void BindSqlTab()
-        {
-            //If there is a SQL connection string configured, set it in the UI
-            string connString = ConfigurationManager.ConnectionStrings["RemoteSqlServer"]?.ToString();
-            if (!string.IsNullOrEmpty(connString))
-            {
-                try
-                {
-                    SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder(connString);
-                    dbServerName.Text = sqlConnectionString.DataSource;
-                    dbDatabaseName.Text = sqlConnectionString.InitialCatalog;
-                }
-                catch
-                {
-                }
-            }
-        }
-
-        private void BindLdapTab()
-        {
-            //Prefill with the current domain
-            ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
-            if (currentUser != null)
-            {
-                ldapDomainname.Text = currentUser.ParentForest.Name;
-            }
-        }
-
-        private void BindMsmqTab()
-        {
-            
-        }
-
-        private void BindFileshareTab()
-        {
-
-        }
-
-        private void BindUserData()
-        {
-            ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
-            if (currentUser != null)
-            {
-                loginName.Text = currentUser.DisplayName;
-            }
-        }
-
-        private void ToggleMessage(string msg, Label messageControl, bool isError = false, bool display = false)
-        {
-            if (messageControl != null)
-            {
-                messageControl.Text = msg;
-                messageControl.Visible = display;
-            }
-        }
-
-        private void BindClaimsTab()
+        protected void BindClaimsTab()
         {
             try
             {
-                ClaimsIdentity claimsIdentity = Request.LogonUserIdentity;
+                ClaimsIdentity claimsIdentity = (ClaimsIdentity)User.Identity;
 
                 string networkClaimType = "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork";
                 string userLocationLabel = "{0} the corporate network";
@@ -141,7 +424,16 @@ namespace IISSite
             }
         }
 
-        private void BindGroupsTab()
+        protected void BindUserData()
+        {
+            ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
+            if (currentUser != null)
+            {
+                loginName.Text = currentUser.DisplayName;
+            }
+        }
+
+        protected void BindGroupsTab()
         {
             List<ADGroup> groups = new List<ADGroup>();
             try
@@ -153,6 +445,15 @@ namespace IISSite
             catch (Exception gex)
             {
                 ToggleMessage($"BindGroupsTab::{gex.ToString()}", winPrincipalTabError);
+            }
+        }
+
+        private void ToggleMessage(string msg, Label messageControl, bool isError = false, bool display = false)
+        {
+            if (messageControl != null)
+            {
+                messageControl.Text = msg;
+                messageControl.Visible = display;
             }
         }
 
@@ -295,7 +596,7 @@ namespace IISSite
                 fileShareMsgs.Items.Add("Binding files");
                 BindFiles(rootFileShareItem);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ToggleMessage($"FileShareBind_Click::Error::{ex.ToString()}", fileshareTabError);
             }
@@ -411,7 +712,7 @@ namespace IISSite
                 fileShareMsgs.Items.Add("ERROR");
                 ToggleMessage($"BindFolders::Error::{ex.ToString()}", fileshareTabError);
             }
-}
+        }
 
         private void BindFiles(FileShareItem fileShareItem)
         {
@@ -541,9 +842,10 @@ namespace IISSite
             //If we are at the root, the trimmed path will be empty, dont add a >
             if (!string.IsNullOrEmpty(trimmedPath))
             {
-                HyperLink lastNode = new HyperLink() {
-                   Text = curPathNode,
-                   NavigateUrl = "#"
+                HyperLink lastNode = new HyperLink()
+                {
+                    Text = curPathNode,
+                    NavigateUrl = "#"
                 };
                 links.Add(lastNode);
             }
@@ -680,7 +982,7 @@ namespace IISSite
                                     {
                                         //Folder has sub folders, enumerate those
                                     }
-                                    folderName.CommandArgument = Json.Encode(fs);
+                                    folderName.CommandArgument = JsonConvert.SerializeObject(fs);
                                     folderName.CommandName = "listfiles";
                                     created.Text = currentFolder.CreationTime.ToString();
                                     lastModifed.Text = currentFolder.LastWriteTime.ToString();
@@ -712,7 +1014,7 @@ namespace IISSite
                         {
                             //Folder has sub folders, enumerate those
                         }
-                        folderName.CommandArgument = Json.Encode(fs);
+                        folderName.CommandArgument = JsonConvert.SerializeObject(fs);
                         folderName.CommandName = "listfiles";
                         created.Text = currentFolder.CreationTime.ToString();
                         lastModifed.Text = currentFolder.LastWriteTime.ToString();
@@ -742,7 +1044,7 @@ namespace IISSite
                 // Get the value of command argument
                 var value = e.CommandArgument;
                 // Do whatever operation you want.  
-                FileShareItem fs = Json.Decode<FileShareItem>(e.CommandArgument.ToString());
+                FileShareItem fs = JsonConvert.DeserializeObject<FileShareItem>(e.CommandArgument.ToString());
                 fileShareMsgs.Items.Add($"DirectoryList_ItemCommand::ListFiles {fs.ActualPath}");
                 BindFiles(fs);
                 BuildBreadcrumb(fs.ParentFileShare, fs.ActualPath);
@@ -774,11 +1076,11 @@ namespace IISSite
             }
             catch (MessageQueueException ee)
             {
-                
+
             }
             catch (Exception eee)
             {
-                
+
             }
             finally
             {
@@ -788,7 +1090,7 @@ namespace IISSite
             UpdateMsmqMessageCount();
         }
 
-        void UpdateMsmqMessageCount()
+        protected void UpdateMsmqMessageCount()
         {
             MessageQueue msMq = new MessageQueue(msmqQueueName.Text, QueueAccessMode.Peek);
             long messageCount = msMq.GetAllMessages().Length;
@@ -805,7 +1107,7 @@ namespace IISSite
                 // msMq.Formatter = new XmlMessageFormatter(new Type[] {typeof(string)});
                 msMq.Formatter = new XmlMessageFormatter(new Type[] { typeof(LogMessage) });
                 var message = (LogMessage)msMq.Receive().Body;
-                msmqQueueReadMsg.Text = Json.Encode(message);
+                msmqQueueReadMsg.Text = JsonConvert.SerializeObject(message);
             }
             catch (MessageQueueException ee)
             {
@@ -863,5 +1165,7 @@ namespace IISSite
         //        }
         //    }
         //}
+
     }
 }
+

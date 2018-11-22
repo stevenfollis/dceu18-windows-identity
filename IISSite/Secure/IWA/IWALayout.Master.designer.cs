@@ -7,27 +7,18 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace IISSite {
+namespace IISSite.IWA {
     
     
-    public partial class Default {
+    public partial class IWALayout {
         
         /// <summary>
-        /// loginName control.
+        /// MainBody control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label loginName;
-        
-        /// <summary>
-        /// UserSourceLocation control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label UserSourceLocation;
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder MainBody;
     }
 }

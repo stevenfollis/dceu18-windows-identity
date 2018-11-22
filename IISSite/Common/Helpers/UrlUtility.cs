@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Text;
 using System.Web;
 
-namespace IISSite.Helpers
+namespace IISSite.Common.Helpers
 {
     public static class UrlUtility
     {

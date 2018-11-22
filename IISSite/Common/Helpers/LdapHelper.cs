@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.ActiveDirectory;
-using System.Linq;
 using System.Security.Principal;
-using System.Web;
-using IISSite.Models;
+using IISSite.Common.Models;
 
-namespace IISSite.Helpers
+namespace IISSite.Common.Helpers
 {
     public class LdapHelper
     {
