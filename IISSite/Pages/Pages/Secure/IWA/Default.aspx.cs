@@ -384,7 +384,27 @@ namespace IISSite.Pages.Secure.IWA
                 BindUserData();
                 BindClaimsTab();
                 BindGroupsTab();
+                BindImpersonationOptions();
             }
+        }
+
+        private void BindImpersonationOptions()
+        {
+            ListItem gmsaListItem = new ListItem()
+            {
+                Text = $"GMSA [{System.Security.Principal.WindowsIdentity.GetCurrent().Name}] (Trusted subsystem, service account/app pool account)",
+                Value = "gmsa",
+                Selected = true
+            };
+
+            ListItem userListItem = new ListItem()
+            {
+                Text = $"User [{Request.LogonUserIdentity.Name}] (Kerberos [Un-]Constrained Delegation)",
+                Value = "user"
+            };
+
+            backendCallType.Items.Add(gmsaListItem);
+            backendCallType.Items.Add(userListItem);
         }
 
         protected void BindClaimsTab()
@@ -483,7 +503,7 @@ namespace IISSite.Pages.Secure.IWA
                 SqlConnection dbConnection = null;
                 SqlDataAdapter dataadapter = null;
 
-                if (backendCallType.SelectedValue == "asuser")
+                if (backendCallType.SelectedValue == "user")
                 {
                     //Impersonate the current user to get the files to browse
                     ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
@@ -613,7 +633,7 @@ namespace IISSite.Pages.Secure.IWA
             try
             {
                 //Impersonate the current user to get the files to browse
-                if (backendCallType.SelectedValue == "asuser")
+                if (backendCallType.SelectedValue == "user")
                 {
                     ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
                     if (currentUser != null)
@@ -724,7 +744,7 @@ namespace IISSite.Pages.Secure.IWA
             try
             {
                 //Impersonate the current user to get the files to browse
-                if (backendCallType.SelectedValue == "asuser")
+                if (backendCallType.SelectedValue == "user")
                 {
                     ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
                     if (currentUser != null)
@@ -956,7 +976,7 @@ namespace IISSite.Pages.Secure.IWA
                     //Make the URL relative
                     //see if we have access to the sub folders. if not, do something
                     //Impersonate the current user to get the files to browse
-                    if (backendCallType.SelectedValue == "asuser")
+                    if (backendCallType.SelectedValue == "user")
                     {
                         ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
                         if (currentUser != null)

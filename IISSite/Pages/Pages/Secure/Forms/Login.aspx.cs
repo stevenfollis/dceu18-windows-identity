@@ -17,12 +17,13 @@ namespace IISSite.Pages.Secure.Forms
         public TextBox PasswordTextbox { get; set; }
         public CheckBox NotPublicCheckBox { get; set; }
         public Label Msg { get; set; }
+        public Panel errorPanel { get; set; }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                Msg.Visible = false;
+                errorPanel.Visible = false;
             }
         }
 
@@ -57,7 +58,7 @@ namespace IISSite.Pages.Secure.Forms
             else
             {
                 Msg.Text = "Login failed. Please check your user name and password and try again.";
-                Msg.Visible = true;
+                errorPanel.Visible = true;
             }
         }
     }
