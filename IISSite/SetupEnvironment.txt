@@ -1,0 +1,46 @@
+﻿$groupName = "ContainerHosts"
+$containerHostName1 = "dceu-win-01"
+$containerHostName2 = "dceu-win-02"
+$containerHostName3 = "dceu-win-03"
+
+New-ADGroup -GroupCategory Security -DisplayName "Windows Container Hosts" -Name $groupName -GroupScope Universal
+Add-ADGroupMember -Members (Get-ADComputer -Identity $containerHostName1) -Identity $groupName
+Add-ADGroupMember -Members (Get-ADComputer -Identity $containerHostName2) -Identity $groupName
+Add-ADGroupMember -Members (Get-ADComputer -Identity $containerHostName3) -Identity $groupName
+
+#Validate that they were indeed created
+Get-ADGroup -Identity $groupName
+Get-ADGroupMember -Identity $groupName
+
+Import-module ActiveDirectory
+Add-KdsRootKey -EffectiveTime ((get-date).addhours(-10));
+
+Set-ADComputer -Identity $containerHostName1 -add @{"msDS-AllowedToDelegateTo"="MSSQLSvc/dceu-sql08-01:1433","MSSQLSvc/dceu-sql08-01.corp.winid.net:1433", "LDAP/corp.winid.net:1433", "CIFS/dceu-windev-01.corp.winid.net:1433", "CIFS/dceu-windev-01.corp.winid.net:1433"}
+Set-ADComputer -Identity $containerHostName2 -add @{"msDS-AllowedToDelegateTo"="MSSQLSvc/dceu-sql08-01:1433","MSSQLSvc/dceu-sql08-01.corp.winid.net:1433", "LDAP/corp.winid.net:1433", "CIFS/dceu-windev-01.corp.winid.net:1433", "CIFS/dceu-windev-01.corp.winid.net:1433"}
+Set-ADComputer -Identity $containerHostName3 -add @{"msDS-AllowedToDelegateTo"="MSSQLSvc/dceu-sql08-01:1433","MSSQLSvc/dceu-sql08-01.corp.winid.net:1433", "LDAP/corp.winid.net:1433", "CIFS/dceu-windev-01.corp.winid.net:1433", "CIFS/dceu-windev-01.corp.winid.net:1433"}
+
+#GMS1
+New-ADServiceAccount -Name "dceu-gmsa" -DNSHostName "dceu-gmsa.corp.winid.net" `
+-PrincipalsAllowedToRetrieveManagedPassword  "Domain Controllers", "domain admins", "CN=ContainerHosts,CN=Users,DC=corp,DC=winid,DC=net" `
+-KerberosEncryptionType RC4, AES128, AES256 `
+-ServicePrincipalNames HTTP/dceu-win-01, HTTP/dceu-win-01.corp.winid.net
+
+Set-ADServiceAccount -Identity "dceu-gmsa" -add @{"msDS-AllowedToDelegateTo"="MSSQLSvc/dceu-sql08-01:1433","MSSQLSvc/dceu-sql08-01.corp.winid.net:1433"}
+
+#GMSA2
+New-ADServiceAccount -Name "dceu-gmsa2" -DNSHostName "dceu-gmsa2.corp.winid.net" `
+-PrincipalsAllowedToRetrieveManagedPassword  "Domain Controllers", "domain admins", "CN=ContainerHosts,CN=Users,DC=corp,DC=winid,DC=net" `
+-KerberosEncryptionType RC4, AES128, AES256 `
+-ServicePrincipalNames HTTP/dceu-win-01, HTTP/dceu-win-01.corp.winid.net
+
+Set-ADServiceAccount -Identity "dceu-gmsa2" -add @{"msDS-AllowedToDelegateTo"="MSSQLSvc/dceu-sql08-01:1433","MSSQLSvc/dceu-sql08-01.corp.winid.net:1433"}
+Set-ADComputer -Identity $containerHostName3 -add @{"msDS-AllowedToDelegateTo"="MSSQLSvc/dceu-sql08-01:1433","MSSQLSvc/dceu-sql08-01.corp.winid.net:1433"}
+
+#GMSA3
+New-ADServiceAccount -Name "dceu-gmsa3" -DNSHostName "dceu-gmsa3.corp.winid.net" `
+-PrincipalsAllowedToRetrieveManagedPassword  "Domain Controllers", "domain admins", "CN=ContainerHosts,CN=Users,DC=corp,DC=winid,DC=net" `
+-KerberosEncryptionType RC4, AES128, AES256 `
+-ServicePrincipalNames HTTP/dceu-gmsa3, HTTP/dceu-gmsa3.corp.winid.net
+
+Set-ADServiceAccount -Identity "dceu-gmsa3" -add @{"msDS-AllowedToDelegateTo"="MSSQLSvc/dceu-sql08-01:1433","MSSQLSvc/dceu-sql08-01.corp.winid.net:1433"}
+

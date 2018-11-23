@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
@@ -13,6 +15,7 @@ namespace IISSite.Pages.Secure.Forms
 {
     public class Default : System.Web.UI.Page
     {
+        #region WebControls
         /// <summary>
         /// loginName control.
         /// </summary>
@@ -32,13 +35,13 @@ namespace IISSite.Pages.Secure.Forms
         protected global::System.Web.UI.WebControls.Label UserSourceLocation;
 
         /// <summary>
-        /// backendCallType control.
+        /// claimsTabError control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButtonList backendCallType;
+        protected global::System.Web.UI.WebControls.Panel claimsTabErrorPanel;
 
         /// <summary>
         /// claimsTabError control.
@@ -68,6 +71,15 @@ namespace IISSite.Pages.Secure.Forms
         protected global::System.Web.UI.WebControls.Label winPrincipalTabError;
 
         /// <summary>
+        /// winPrincipalTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel winPrincipalTabErrorPanel;
+
+        /// <summary>
         /// userGroupsGrid control.
         /// </summary>
         /// <remarks>
@@ -75,6 +87,86 @@ namespace IISSite.Pages.Secure.Forms
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DataGrid userGroupsGrid;
+
+        /// <summary>
+        /// dbMessages control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ListBox dbMessages;
+
+        /// <summary>
+        /// databaseTabErrorPanel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel databaseTabErrorPanel;
+
+        /// <summary>
+        /// databaseTabError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label databaseTabError;
+
+        /// <summary>
+        /// dbServerName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox dbServerName;
+
+        /// <summary>
+        /// dbDatabaseName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox dbDatabaseName;
+        /// <summary>
+        /// dbQuery control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox dbQuery;
+        /// <summary>
+        /// GetData control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button GetData;
+
+        /// <summary>
+        /// sqlResults control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel sqlResults;
+
+        /// <summary>
+        /// sqlDataGrid control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DataGrid sqlDataGrid;
+        #endregion
 
         protected override void OnLoad(EventArgs e)
         {
@@ -121,7 +213,7 @@ namespace IISSite.Pages.Secure.Forms
             }
             catch (Exception ex)
             {
-                ToggleMessage($"BindClaimsTab::Error{ex.ToString()}", claimsTabError);
+                ToggleMessage($"BindClaimsTab::Error{ex.ToString()}", claimsTabErrorPanel, claimsTabError);
             }
         }
         protected void BindUserData()
@@ -144,17 +236,64 @@ namespace IISSite.Pages.Secure.Forms
             }
             catch (Exception gex)
             {
-                ToggleMessage($"BindGroupsTab::{gex.ToString()}", winPrincipalTabError);
+                ToggleMessage($"BindGroupsTab::{gex.ToString()}", winPrincipalTabErrorPanel, winPrincipalTabError);
             }
         }
 
-        private void ToggleMessage(string msg, Label messageControl, bool isError = false, bool display = false)
+        private void ToggleMessage(string msg, Panel messagePanel, Label messageControl, bool isError = false, bool display = false)
         {
-            if (messageControl != null)
+            if (messagePanel != null && messageControl != null)
             {
                 messageControl.Text = msg;
-                messageControl.Visible = display;
+                messagePanel.Visible = display || isError;
             }
         }
+
+        protected void GetSQLData_Click(object sender, EventArgs e)
+        {
+            // Open the connection.
+            ToggleMessage("", databaseTabErrorPanel, databaseTabError);
+            dbMessages.Items.Clear();
+            //string sqlQuery = "SELECT TOP 1000 [Id],[ParentCategoryId],[Path],[Name],[NumActiveAds] FROM [Classifieds].[dbo].[Categories]";
+            string sqlQuery = dbQuery.Text;
+
+            try
+            {
+                SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder
+                {
+                    IntegratedSecurity = true,
+                    DataSource = dbServerName.Text,
+                    InitialCatalog = dbDatabaseName.Text,
+                    //Authentication = SqlAuthenticationMethod.ActiveDirectoryIntegrated,
+                    TrustServerCertificate = true
+                };
+
+                dbMessages.Items.Add($"Connecting to [{sqlConnectionString.ToString()}]");
+
+                DataSet ds = new DataSet();
+                DataTable dt = new DataTable();
+                SqlConnection dbConnection = null;
+                SqlDataAdapter dataadapter = null;
+
+                // Run the SQL statement, and then get the returned rows to the DataReader.
+                dbConnection = new SqlConnection(sqlConnectionString.ToString());
+                dbMessages.Items.Add("Opening DB");
+                dbConnection.Open();
+                dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
+                dbMessages.Items.Add("Fetching data");
+                dataadapter.Fill(ds, "data");
+
+                dbConnection.Close();
+                sqlDataGrid.DataSource = ds.Tables["data"].DefaultView;
+                sqlDataGrid.DataBind();
+                sqlResults.Visible = true;
+            }
+            catch (Exception sqlex)
+            {
+                ToggleMessage($"GetSQLData_Click::{sqlex.ToString()}", databaseTabErrorPanel, databaseTabError, true, true);
+                sqlResults.Visible = false;
+            }
+        }
+
     }
 }

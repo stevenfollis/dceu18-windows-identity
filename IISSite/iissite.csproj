@@ -99,6 +99,7 @@
     <Content Include="Secure\Forms\Login.aspx" />
     <Content Include="Secure\Forms\Logout.aspx" />
     <Content Include="Secure\IWA\Default.aspx" />
+    <Content Include="SetupEnvironment.txt" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
