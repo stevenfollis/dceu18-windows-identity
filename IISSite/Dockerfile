@@ -17,9 +17,29 @@ RUN Install-WindowsFeature Web-Windows-Auth
 
 #Enable Windows Authenticaiton on the site
 RUN Import-module IISAdministration; \
-    New-IISSite -Name "Site" -PhysicalPath C:\site -BindingInformation "*:80:"
-RUN C:\windows\system32\inetsrv\appcmd.exe set config "Site" -section:system.webServer/security/authentication/anonymousAuthentication /enabled:"False" /commit:apphost
-RUN  C:\windows\system32\inetsrv\appcmd.exe set config "Site" -section:system.webServer/security/authentication/windowsAuthentication /enabled:"True" /commit:apphost
+    New-IISSite -Name "Site" -PhysicalPath C:\site -BindingInformation "*:80:" 
+
+RUN C:\windows\system32\inetsrv\appcmd.exe add apppool /name:"gmsatest" /managedPipelineMode:"Integrated"
+RUN C:\windows\system32\inetsrv\appcmd.exe set config /section:applicationPools "/[name='gmsatest'].processModel.identityType:LocalSystem" 
+RUN C:\windows\system32\inetsrv\appcmd.exe add site /name:Site /id:1 /bindings:http://dceu-gmsa2:80 /physicalPath:C:\site
+#RUN c:\windows\system32\inetsrv\appcmd.exe set site Site "/[path='/'].applicationPool:gmsatest"
+
+# Create apps 
+RUN C:\windows\system32\inetsrv\appcmd.exe add app /site.name:Site /path:/secure/forms /physicalPath:C:\sites\secure\forms
+RUN C:\windows\system32\inetsrv\appcmd.exe add app /site.name:Site /path:/secure/iwa /physicalPath:C:\sites\secure\iwa
+
+# Associate sites with App Pool
+RUN C:\windows\system32\inetsrv\appcmd.exe set app "Site/secure/forms" /applicationPool:gmsatest
+RUN C:\windows\system32\inetsrv\appcmd.exe set app "Site/secure/iwa" /applicationPool:gmsatest
+
+# Set some stuff anonymous i guess i dont know its tired and late and im not fully following the diff between app and site and kittens
+RUN C:\windows\system32\inetsrv\appcmd.exe set config "Site" -section:system.webServer/security/authentication/anonymousAuthentication /enabled:"True" /commit:apphost
+RUN C:\windows\system32\inetsrv\appcmd.exe set config "Site/secure/iwa" -section:system.webServer/security/authentication/anonymousAuthentication /enabled:"True" /commit:apphost
+RUN C:\windows\system32\inetsrv\appcmd.exe set config "Site" -section:system.webServer/security/authentication/anonymousAuthentication /enabled:"True" /commit:apphost
+
+RUN C:\windows\system32\inetsrv\appcmd.exe set config "Site" -section:system.webServer/security/authentication/windowsAuthentication /enabled:"True" /commit:apphost
+
+
 EXPOSE 80
 
 
