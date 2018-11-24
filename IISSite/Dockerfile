@@ -1,46 +1,123 @@
-FROM microsoft/iis:windowsservercore-1803
-SHELL ["powershell"]
-RUN mkdir C:\site
-ADD . /site
-RUN Install-WindowsFeature NET-Framework-45-ASPNET ; \  
-    Install-WindowsFeature Web-Asp-Net45
-RUN Remove-WebSite -Name 'Default Web Site' 
-RUN Install-WindowsFeature Web-Windows-Auth
+# escape=`
 
-#These are only needed for accessing the IIS admin UI
-#RUN net user localadmin Qwerty123456 /add
-#RUN net localgroup Administrators localadmin /add 
-#RUN Install-WindowsFeature Web-Mgmt-Service
-#RUN New-ItemProperty -Path HKLM:\software\microsoft\WebManagement\Server -Name EnableRemoteManagement -Value 1 -Force
-#RUN Start-Service WMSVC
-#These are only needed for accessing the IIS admin UI
+# ================================================================================================
+# Builder Stage
+# https://blogs.msdn.microsoft.com/dotnet/2018/06/13/using-net-and-docker-together-dockercon-2018-update/
+# ================================================================================================
 
-#Enable Windows Authenticaiton on the site
-RUN Import-module IISAdministration; \
-    New-IISSite -Name "Site" -PhysicalPath C:\site -BindingInformation "*:80:" 
+FROM microsoft/dotnet-framework:4.7.2-sdk as builder
 
-RUN C:\windows\system32\inetsrv\appcmd.exe add apppool /name:"gmsatest" /managedPipelineMode:"Integrated"
-RUN C:\windows\system32\inetsrv\appcmd.exe set config /section:applicationPools "/[name='gmsatest'].processModel.identityType:LocalSystem" 
-RUN C:\windows\system32\inetsrv\appcmd.exe add site /name:Site /id:1 /bindings:http://dceu-gmsa2:80 /physicalPath:C:\site
-#RUN c:\windows\system32\inetsrv\appcmd.exe set site Site "/[path='/'].applicationPool:gmsatest"
+WORKDIR C:\site
 
-# Create apps 
-RUN C:\windows\system32\inetsrv\appcmd.exe add app /site.name:Site /path:/secure/forms /physicalPath:C:\sites\secure\forms
-RUN C:\windows\system32\inetsrv\appcmd.exe add app /site.name:Site /path:/secure/iwa /physicalPath:C:\sites\secure\iwa
+# Build Visual Studio Solution
+# TODO: Optimize Nuget restoration into layers
+COPY . C:\site
 
-# Associate sites with App Pool
-RUN C:\windows\system32\inetsrv\appcmd.exe set app "Site/secure/forms" /applicationPool:gmsatest
-RUN C:\windows\system32\inetsrv\appcmd.exe set app "Site/secure/iwa" /applicationPool:gmsatest
+RUN nuget restore
 
-# Set some stuff anonymous i guess i dont know its tired and late and im not fully following the diff between app and site and kittens
-RUN C:\windows\system32\inetsrv\appcmd.exe set config "Site" -section:system.webServer/security/authentication/anonymousAuthentication /enabled:"True" /commit:apphost
-RUN C:\windows\system32\inetsrv\appcmd.exe set config "Site/secure/iwa" -section:system.webServer/security/authentication/anonymousAuthentication /enabled:"True" /commit:apphost
-RUN C:\windows\system32\inetsrv\appcmd.exe set config "Site" -section:system.webServer/security/authentication/anonymousAuthentication /enabled:"True" /commit:apphost
+RUN msbuild `
+	/p:Configuration=Release `
+	WinContainerTester.sln
 
-RUN C:\windows\system32\inetsrv\appcmd.exe set config "Site" -section:system.webServer/security/authentication/windowsAuthentication /enabled:"True" /commit:apphost
+# ================================================================================================
+# Runtime Stage
+# ================================================================================================
 
+FROM microsoft/aspnet:4.7.2-windowsservercore-1803
+#FROM microsoft/aspnet:4.7.2-windowsservercore-ltsc2016
 
 EXPOSE 80
 
+WORKDIR C:\site
 
+# Setup Operating System
+RUN Import-Module "WebAdministration"; `
+	Install-WindowsFeature "Web-Windows-Auth";
 
+# Enable IIS Remote Administration
+RUN net user localadmin Qwerty123456 /add; `
+	net localgroup Administrators localadmin /add; `
+	Install-WindowsFeature Web-Mgmt-Service; `
+	New-ItemProperty -Path "HKLM:\software\microsoft\WebManagement\Server" -Name "EnableRemoteManagement" -Value 1 -Force;
+
+# Setup IIS Server
+RUN New-WebAppPool "GMSATestPool"; `
+
+	# Configure AppPool to run as LocalSystem 
+	Set-ItemProperty `
+		-Path "IIS:\AppPools\GMSATestPool" `
+		-Name "processModel" `
+		-Value @{identitytype=0}; `
+
+	# Start AppPool automatically (no "cold start")
+	Set-ItemProperty `
+		-Path "IIS:\AppPools\GMSATestPool" `
+		-Name "startMode" `
+		-Value "AlwaysRunning"; `
+
+	# Replace Default Web Site
+	Remove-WebSite -Name 'Default Web Site'; `
+	
+	New-WebSite `
+		-Name "Site" `
+		-Port 80 `
+		-PhysicalPath "C:\site" `
+		-ApplicationPool "GMSATestPool"; `
+
+	# Configure for Anonymous Authentication
+	Set-WebConfigurationProperty `
+		-Location "Site" `
+		-PSPath IIS:\ `
+		-Filter "system.webServer/security/authentication/anonymousAuthentication" `
+		-Name "enabled" `
+		-Value $true;
+
+# Copy compiled files from Builder Stage
+COPY --from=builder C:\site\ c:\site\
+
+# Create Web Applications and configure authentication
+RUN New-WebApplication `
+		-Name "Secure\Forms" `
+		-Site "Site" `
+		-PhysicalPath "C:\site\Secure\Forms" `
+		-ApplicationPool "GMSATestPool"; `
+	
+	New-WebApplication `
+		-Name "Secure\IWA" `
+		-Site "Site" `
+		-PhysicalPath "C:\site\Secure\IWA" `
+		-ApplicationPool "GMSATestPool"; `
+	
+	Set-WebConfigurationProperty `
+		-Location "Site/Secure/Forms" `
+		-PSPath IIS:\ `
+		-Filter "/system.webServer/security/authentication/anonymousAuthentication" `
+		-Name "Enabled" `
+		-Value $True; `
+		
+	Set-WebConfigurationProperty `
+		-Location "Site/Secure/IWA" `
+		-PSPath IIS:\ `
+		-Filter "/system.webServer/security/authentication/windowsAuthentication" `
+		-Name "Enabled" `
+		-Value $True; `
+
+	Set-WebConfigurationProperty `
+		-Location "Site/Secure/IWA" `
+		-PSPath IIS:\ `
+		-Filter "/system.webServer/security/authentication/anonymousAuthentication" `
+		-Name "Enabled" `
+		-Value False;
+
+# Check application health against anonymous endpoint
+HEALTHCHECK --interval=5s `
+	CMD powershell -command `
+		try { `
+			$status = (Invoke-WebRequest -Uri http://localhost -UseBasicParsing).StatusCode `
+			if ($status -eq 200) { return 0 } `
+			else { return 1 }; `
+		}	catch { return 1 }
+
+# Start IIS Remote Management and monitor IIS
+ENTRYPOINT	Start-Service WMSVC; `
+			C:\ServiceMonitor.exe w3svc;
