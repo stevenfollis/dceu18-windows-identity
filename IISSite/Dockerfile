@@ -23,8 +23,8 @@ RUN msbuild `
 # Runtime Stage
 # ================================================================================================
 
-FROM microsoft/aspnet:4.7.2-windowsservercore-1803
-#FROM microsoft/aspnet:4.7.2-windowsservercore-ltsc2016
+#FROM microsoft/aspnet:4.7.2-windowsservercore-1803
+FROM microsoft/aspnet:4.7.2-windowsservercore-ltsc2016
 
 EXPOSE 80
 
@@ -110,14 +110,13 @@ RUN New-WebApplication `
 		-Value False;
 
 # Check application health against anonymous endpoint
-HEALTHCHECK --interval=5s `
-	CMD powershell -command `
-		try { `
-			$status = (Invoke-WebRequest -Uri http://localhost -UseBasicParsing).StatusCode `
-			if ($status -eq 200) { return 0 } `
-			else { return 1 }; `
-		}	catch { return 1 }
+HEALTHCHECK CMD powershell -command `  
+    try { `
+     $response = iwr http://localhost:80 -UseBasicParsing; `
+     if ($response.StatusCode -eq 200) { return 0} `
+     else {return 1}; `
+    } catch { return 1 }
 
 # Start IIS Remote Management and monitor IIS
 ENTRYPOINT	Start-Service WMSVC; `
-			C:\ServiceMonitor.exe w3svc;
+		C:\ServiceMonitor.exe w3svc;
