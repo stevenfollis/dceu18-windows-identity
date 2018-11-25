@@ -24,8 +24,8 @@ RUN msbuild `
 # Runtime Stage
 # ================================================================================================
 
-#FROM microsoft/aspnet:4.7.2-windowsservercore-ltsc2016
-FROM microsoft/aspnet:4.7.2-windowsservercore-1803
+#FROM microsoft/aspnet:4.7.2-windowsservercore-1803
+FROM microsoft/aspnet:4.7.2-windowsservercore-ltsc2016
 
 EXPOSE 80
 
