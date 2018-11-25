@@ -5,7 +5,8 @@
 # https://blogs.msdn.microsoft.com/dotnet/2018/06/13/using-net-and-docker-together-dockercon-2018-update/
 # ================================================================================================
 
-FROM microsoft/dotnet-framework:4.7.2-sdk as builder
+#FROM microsoft/dotnet-framework:4.7.2-sdk-windowsservercore-ltsc2016 as builder
+FROM microsoft/dotnet-framework:4.7.2-sdk-windowsservercore-1803 as builder
 
 WORKDIR C:\site
 
@@ -23,8 +24,8 @@ RUN msbuild `
 # Runtime Stage
 # ================================================================================================
 
-#FROM microsoft/aspnet:4.7.2-windowsservercore-1803
-FROM microsoft/aspnet:4.7.2-windowsservercore-ltsc2016
+#FROM microsoft/aspnet:4.7.2-windowsservercore-ltsc2016
+FROM microsoft/aspnet:4.7.2-windowsservercore-1803
 
 EXPOSE 80
 
@@ -32,9 +33,6 @@ WORKDIR C:\site
 
 # Setup Operating System
 RUN Import-Module "WebAdministration"; `
-	Import-Module "IISAdministration" ; `
-	Import-Module "ServerManager"; `
-	Install-WindowsFeature "Web-Scripting-Tools"; `
 	Install-WindowsFeature "Web-Windows-Auth";
 
 # Enable IIS Remote Administration
@@ -44,32 +42,30 @@ RUN net user localadmin Qwerty123456 /add; `
 	New-ItemProperty -Path "HKLM:\software\microsoft\WebManagement\Server" -Name "EnableRemoteManagement" -Value 1 -Force;
 
 # Setup IIS Server
-# Configure AppPool to run as LocalSystem 
-RUN New-WebAppPool "GMSA-AppPool"; 
+RUN New-WebAppPool "GMSATestPool"; `
 
-# Start AppPool automatically (no "cold start")
-#RUN Set-ItemProperty `
-		#-Path "IIS:\AppPools\GMSA-AppPool" `
-		#-Name "startMode" `
-		#-Value "AlwaysRunning";
-#
-#RUN Set-ItemProperty `
-		#-Path "IIS:\AppPools\GMSA-AppPool" `
-		#-Name "processModel" `
-		#-Value @{identitytype=0};
-#
+	# Configure AppPool to run as LocalSystem 
+	Set-ItemProperty `
+		-Path "IIS:\AppPools\GMSATestPool" `
+		-Name "processModel" `
+		-Value @{identitytype=0}; `
 
-# Replace Default Web Site
-# Configure for Anonymous Authentication
+	# Start AppPool automatically (no "cold start")
+	Set-ItemProperty `
+		-Path "IIS:\AppPools\GMSATestPool" `
+		-Name "startMode" `
+		-Value "AlwaysRunning"; `
 
-RUN Remove-WebSite -Name 'Default Web Site'; `
-
+	# Replace Default Web Site
+	Remove-WebSite -Name 'Default Web Site'; `
+	
 	New-WebSite `
 		-Name "Site" `
 		-Port 80 `
 		-PhysicalPath "C:\site" `
-		-ApplicationPool "GMSA-AppPool"; `
+		-ApplicationPool "GMSATestPool"; `
 
+	# Configure for Anonymous Authentication
 	Set-WebConfigurationProperty `
 		-Location "Site" `
 		-PSPath IIS:\ `
@@ -80,20 +76,19 @@ RUN Remove-WebSite -Name 'Default Web Site'; `
 # Copy compiled files from Builder Stage
 COPY --from=builder C:\site\ c:\site\
 
-# 1-Create Web Applications
-# 2-Configure authentication
+# Create Web Applications and configure authentication
 RUN New-WebApplication `
 		-Name "Secure\Forms" `
 		-Site "Site" `
 		-PhysicalPath "C:\site\Secure\Forms" `
-		-ApplicationPool "GMSA-AppPool"; `
+		-ApplicationPool "GMSATestPool"; `
 	
 	New-WebApplication `
 		-Name "Secure\IWA" `
 		-Site "Site" `
 		-PhysicalPath "C:\site\Secure\IWA" `
-		-ApplicationPool "GMSA-AppPool"; `
-
+		-ApplicationPool "GMSATestPool"; `
+	
 	Set-WebConfigurationProperty `
 		-Location "Site/Secure/Forms" `
 		-PSPath IIS:\ `
@@ -125,4 +120,4 @@ HEALTHCHECK CMD powershell -command `
 
 # Start IIS Remote Management and monitor IIS
 ENTRYPOINT	Start-Service WMSVC; `
-			C:\ServiceMonitor.exe w3svc;
+		C:\ServiceMonitor.exe w3svc;
