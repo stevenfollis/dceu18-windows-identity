@@ -26,9 +26,9 @@
                     </div>
                     <div id="claimsdata" class="collapse" aria-labelledby="claimsinfo" data-parent="#logininfo">
                         <div class="card-body">
-                            <p>
-                                <asp:Label ID="claimsTabError" CssClass="bg-danger" runat="server" Visible="false"></asp:Label>
-                            </p>
+                            <asp:Panel ID="claimsTabErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
+                                <asp:Label ID="claimsTabError" runat="server"></asp:Label>
+                            </asp:panel>
                             <p>
                                 <asp:DataGrid ID="claimsGrid" runat="server" CssClass="table table-striped table-bordered table-condensed table-responsive">
                                     <Columns>
@@ -48,12 +48,11 @@
                         </button>
                     </h5>
                 </div>
-
                 <div id="winprincipaldata" class="collapse" aria-labelledby="winprincipalinfo" data-parent="#logininfo">
                     <div class="card-body">
-                        <p>
-                            <asp:Label ID="winPrincipalTabError" CssClass="bg-danger" runat="server" Visible="false"></asp:Label>
-                        </p>
+                        <asp:Panel ID="winPrincipalTabErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
+                            <asp:Label ID="winPrincipalTabError" runat="server" ></asp:Label>
+                        </asp:panel>
                         <p>
                             <asp:DataGrid ID="userGroupsGrid" runat="server" AutoGenerateColumns="false" CssClass="table table-striped table-bordered table-condensed table-responsive">
                                 <Columns>
@@ -66,6 +65,39 @@
                     </div>
                 </div>
             </div>
+            <asp:UpdatePanel runat="server" RenderMode="Inline" UpdateMode="Conditional" ValidateRequestMode="Disabled">
+                <ContentTemplate>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <asp:ListBox ID="dbMessages" runat="server"></asp:ListBox>
+                        </div>
+                        <asp:Panel ID="databaseTabErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
+                            <asp:Label ID="databaseTabError" runat="server" Visible="false"></asp:Label>
+                        </asp:Panel>
+                    </div>
+                    <div class="form-group">
+                        <label for="dbServerName">Server Name</label>
+                        <asp:TextBox runat="server" CssClass="form-control" ID="dbServerName" placeholder="Enter Servername" />
+                    </div>
+                    <div class="form-group">
+                        <label for="dbDatabaseName">Database Name</label>
+                        <asp:TextBox runat="server" CssClass="form-control" ID="dbDatabaseName" placeholder="Database Name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="dbQuery">Sql Query</label>
+                        <asp:TextBox runat="server" CssClass="form-control" ID="dbQuery" placeholder="SQL Query" Columns="10" Rows="5" TextMode="MultiLine" Text="SELECT TOP 100 * FROM Categories" />
+                    </div>
+                    <asp:Button OnClick="GetSQLData_Click" ID="GetData" Text="Get SQL Data" runat="server" />
+                    <div class="card">
+                        <div class="card-body">
+                            <asp:Panel ID="sqlResults" runat="server" Visible="false">
+                                <asp:DataGrid ID="sqlDataGrid" AutoGenerateColumns="true" runat="server" CssClass="table table-striped table-bordered">
+                                </asp:DataGrid>
+                            </asp:Panel>
+                        </div>
+                    </div>
+                </ContentTemplate>
+            </asp:UpdatePanel>
         </div>
     </form>
 </asp:Content>

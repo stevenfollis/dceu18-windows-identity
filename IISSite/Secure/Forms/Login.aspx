@@ -24,9 +24,9 @@
                         <p class="lead">User names are hard coded in the web.config for this example:</p>
                     </div>
                     <div class="form-group">
-                        <b>User Name:</b> <i>user1@winid.net</i> <b>Password:</b> <i>password</i> or
+                        <b>User Name:</b> <i>user1@forms.user</i> <b>Password:</b> <i>password</i> or
                                         <br />
-                        <b>User Name:</b> <i>user2@winid.net</i> <b>Password:</b> <i>password</i>
+                        <b>User Name:</b> <i>user2@forms.user</i> <b>Password:</b> <i>password</i>
                     </div>
                     <div class="form-group">
                         <div class="checkbox mb-3">

@@ -40,75 +40,7 @@
         </section>
 
         <div class="container-fluid">
-            <%--<div class="col-lg-3 col-md-6 mb-4">
-                <div class="card h-60">
-                    <h4 class="card-header">Anonymous</h4>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item"><b>Page:</b> This page</li>
-                            <li class="list-group-item"><b>Requires login:</b> NO</li>
-                            <li class="list-group-item"><b>App Pool Account:</b><%= System.Security.Principal.WindowsIdentity.GetCurrent().Name %></li>
-                            <li class="list-group-item"><b>Accessses back end resources:</b> None</li>
-                        </ul>
-                    </div>
-                    <div class="card-footer">
-                        <a class="btn btn-primary" href="/">GO</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card h-60">
-                    <h4 class="card-header">Forms</h4>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item"><b>Page:</b> Forms</li>
-                            <li class="list-group-item"><b>Requires login:</b> YES (forms user)</li>
-                            <li class="list-group-item"><b>App Pool Account:</b><%= System.Security.Principal.WindowsIdentity.GetCurrent().Name %></li>
-                            <li class="list-group-item"><b>Accessses back end resources:</b> YES</li>
-                        </ul>
-                    </div>
-                    <div class="card-footer">
-                        <a class="btn btn-primary" href="/secure/forms">GO</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card h-60">
-                    <h4 class="card-header">IWA</h4>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item"><b>Page:</b> Winodws</li>
-                            <li class="list-group-item"><b>Requires login:</b> YES (Windows domain Account)</li>
-                            <li class="list-group-item"><b>App Pool Account:</b> gMSA</li>
-                            <li class="list-group-item"><b>Accessses back end resources:</b> YES as gMSA using IWA</li>
-                        </ul>
-                    </div>
-                    <div class="card-footer">
-                        <a class="btn btn-primary" href="http://dceu-windev-01.corp.winid.net/secure/iwa">GO</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card h-60">
-                    <h4 class="card-header">IWA+Delgation</h4>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item"><b>Page:</b> Winodws</li>
-                            <li class="list-group-item"><b>Requires login:</b> YES (Windows domain Account)</li>
-                            <li class="list-group-item"><b>App Pool Account:</b> gMSA</li>
-                            <li class="list-group-item"><b>Accessses back end resources:</b> YES using Kerberos Delegaton as the User</li>
-                        </ul>
-                    </div>
-                    <div class="card-footer">
-                        <a class="btn btn-primary" href="http://dceu-windev-01.corp.winid.net/secure/iwa">GO</a>
-                    </div>
-                </div>
-            </div>--%>  
-
-            <div class="card-deck">
+             <div class="card-deck">
                 <div class="card border-primary">
                     <h4 class="card-header bg-primary text-white"><i class="fas fa-ghost"></i> Anonymous</h4>
                     <div class="card-body">

@@ -4,9 +4,9 @@
     <form runat="server">
         <asp:ScriptManager runat="server"></asp:ScriptManager>
 
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 offset-md-3">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-lg-5 col-md-6">
+                <div class="text-center">
                     <asp:Button ID="LogoutButton" CssClass="btn btn-primary" runat="server" OnClick="LogoutButton_OnClick" Text="Click to logout" />
                 </div>
             </div>
