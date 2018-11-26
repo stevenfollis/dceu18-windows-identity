@@ -111,7 +111,7 @@ RUN New-WebApplication `
 		-Value False; `
 	
 	Set-WebConfigurationProperty `
-		-PSPath 'MACHINE/WEBROOT/APPHOST/Default Web Site/Secure/IWA'  `
+		-PSPath 'MACHINE/WEBROOT/APPHOST/Site/Secure/IWA'  `
 		-Filter "system.webServer/security/authentication/windowsAuthentication" `
 		-Name "useAppPoolCredentials" `
 		-Value "True"
