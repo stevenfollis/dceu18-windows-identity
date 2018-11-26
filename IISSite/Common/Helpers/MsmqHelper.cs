@@ -53,7 +53,7 @@ namespace IISSite.Common.Helpers
         {
             return (privateQueue) ? string.Format("{0}\\private$\\{1}", machineName, qname) : string.Format("{0}\\{1}", machineName, qname);
         }
-        public static MessageQueue GetOrCreateQueue(string qName, string qMachineName, bool isPrivate, bool forceUseDirectName = false, bool MustAllowSend = true, bool MustAllowRead = true)
+        public static MessageQueue GetOrCreateQueue(string qMachineName, string qName, bool isPrivate, bool forceUseDirectName = false, bool MustAllowSend = true, bool MustAllowRead = true)
         {
             MessageQueue mq = null;
             string directQueueName = string.Empty;

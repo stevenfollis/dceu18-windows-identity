@@ -22,355 +22,42 @@ namespace IISSite.Pages.Secure.IWA
     public class Default : System.Web.UI.Page
     {
         #region "WebControls"
-        /// <summary>
-        /// loginName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Label loginName;
-
-        /// <summary>
-        /// UserSourceLocation control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Label UserSourceLocation;
-
-        /// <summary>
-        /// backendCallType control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.RadioButtonList backendCallType;
-
-        /// <summary>
-        /// claimsTabError control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Label claimsTabError;
-
-        /// <summary>
-        /// claimsGrid control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DataGrid claimsGrid;
-
-        /// <summary>
-        /// winPrincipalTabError control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label winPrincipalTabError;
-
-        /// <summary>
-        /// userGroupsGrid control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.DataGrid userGroupsGrid;
-
-        /// <summary>
-        /// dbMessages control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.ListBox dbMessages;
-
-        /// <summary>
-        /// databaseTabErrorPanel control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel databaseTabErrorPanel;
-
-        /// <summary>
-        /// databaseTabError control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label databaseTabError;
-
-        /// <summary>
-        /// dbServerName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
+        protected global::System.Web.UI.WebControls.DataGrid claimsGrid;
+        protected global::System.Web.UI.WebControls.Label winPrincipalTabError;
+        protected global::System.Web.UI.WebControls.ListBox resultsMessages;
+        protected global::System.Web.UI.WebControls.Panel resultsMessagePanel;
+        protected global::System.Web.UI.WebControls.Panel resultsErrorMessagePanel;
+        protected global::System.Web.UI.WebControls.Panel dataResultsPanel;
+        protected global::System.Web.UI.WebControls.Panel fileResultsPanel;
+        protected global::System.Web.UI.WebControls.Label resultsErrorMessage;
+        protected global::System.Web.UI.WebControls.DataGrid dataResultsGrid;
         protected global::System.Web.UI.WebControls.TextBox dbServerName;
-
-        /// <summary>
-        /// dbDatabaseName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox dbDatabaseName;
-
-        /// <summary>
-        /// dbQuery control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox dbQuery;
-
-        /// <summary>
-        /// GetData control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Button GetData;
-
-        /// <summary>
-        /// sqlResults control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel sqlResults;
-
-        /// <summary>
-        /// sqlDataGrid control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DataGrid sqlDataGrid;
-
-        /// <summary>
-        /// ldapMessages control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.ListBox ldapMessages;
-
-        /// <summary>
-        /// ldapTabError control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label ldapTabError;
-
-        /// <summary>
-        /// ldapDomainname control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox ldapDomainname;
-
-        /// <summary>
-        /// ldapUsersOrGroups control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox ldapSearchString;
         protected global::System.Web.UI.WebControls.RadioButtonList ldapUsersOrGroups;
-
-        /// <summary>
-        /// ldapBind control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Button ldapBind;
-
-        /// <summary>
-        /// ldapDataGrid control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DataGrid ldapDataGrid;
-
-        /// <summary>
-        /// msmqTabError control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label msmqTabError;
-
-        /// <summary>
-        /// msmqQueueName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox msmqQueueName;
-
-        /// <summary>
-        /// msmqQueueMsg control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox msmqMachineName;
         protected global::System.Web.UI.WebControls.TextBox msmqQueueMsg;
-
-        /// <summary>
-        /// msmqQueueSendMessage control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Button msmqQueueSendMessage;
-
-        /// <summary>
-        /// msmqQueueMsgCount control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Label msmqQueueMsgCount;
-
-        /// <summary>
-        /// msmqQueueReadMessageCount control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Button msmqQueueReadMessageCount;
-
-        /// <summary>
-        /// msmqQueueReadMessage control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Button msmqQueueReadMessage;
-
-        /// <summary>
-        /// msmqQueueReadMsg control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox msmqQueueReadMsg;
-
-        /// <summary>
-        /// fileShareMsgs control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.ListBox fileShareMsgs;
-
-        /// <summary>
-        /// fileshareTabError control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label fileshareTabError;
-
-        /// <summary>
-        /// fileShareServerName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox fileShareServerName;
-
-        /// <summary>
-        /// fileShareName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox fileShareName;
-
-        /// <summary>
-        /// fileShareBind control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Button fileShareBind;
-
-        /// <summary>
-        /// breadcrumbLinks control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.DataList breadcrumbLinks;
-
-        /// <summary>
-        /// fileShareList control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater fileShareList;
-
-        /// <summary>
-        /// directoryList control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater directoryList;
-
-        /// <summary>
-        /// fileList control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater fileList;
 
         public string FileShareRootPath { get; private set; }
@@ -440,7 +127,7 @@ namespace IISSite.Pages.Secure.IWA
             }
             catch (Exception ex)
             {
-                ToggleMessage($"BindClaimsTab::Error{ex.ToString()}", claimsTabError);
+                ToggleMessage($"BindClaimsTab::Error{ex.ToString()}", true, true);
             }
         }
 
@@ -464,25 +151,26 @@ namespace IISSite.Pages.Secure.IWA
             }
             catch (Exception gex)
             {
-                ToggleMessage($"BindGroupsTab::{gex.ToString()}", winPrincipalTabError);
+                ToggleMessage($"BindGroupsTab::{gex.ToString()}", true);
             }
         }
 
-        private void ToggleMessage(string msg, Label messageControl, bool isError = false, bool display = false)
+        private void ToggleMessage(string msg, bool isError = false, bool display = true)
         {
-            if (messageControl != null)
+            resultsMessagePanel.Visible = display;
+            if (isError)
             {
-                messageControl.Text = msg;
-                messageControl.Visible = display;
+                resultsErrorMessage.Text = msg;
+                resultsErrorMessage.Visible = display;
+                resultsErrorMessagePanel.Visible = display;
             }
         }
 
         protected void GetSQLData_Click(object sender, EventArgs e)
         {
             // Open the connection.
-            ToggleMessage("", databaseTabError);
-            dbMessages.Items.Clear();
-            //string sqlQuery = "SELECT TOP 1000 [Id],[ParentCategoryId],[Path],[Name],[NumActiveAds] FROM [Classifieds].[dbo].[Categories]";
+            ClearResultPanels();
+
             string sqlQuery = dbQuery.Text;
 
             try
@@ -496,7 +184,7 @@ namespace IISSite.Pages.Secure.IWA
                     TrustServerCertificate = true
                 };
 
-                dbMessages.Items.Add($"Connecting to [{sqlConnectionString.ToString()}] {backendCallType.SelectedValue}");
+                resultsMessages.Items.Add($"Connecting to [{sqlConnectionString.ToString()}] {backendCallType.SelectedValue}");
 
                 DataSet ds = new DataSet();
                 DataTable dt = new DataTable();
@@ -509,31 +197,24 @@ namespace IISSite.Pages.Secure.IWA
                     ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
                     if (currentUser != null)
                     {
-                        dbMessages.Items.Add($"Connecting as {currentUser.UserPrincipalName}");
-                        //WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
-                        //using (WindowsImpersonationContext wCtx = wi.Impersonate())
-                        //{
-                        //    // Run the SQL statement, and then get the returned rows to the DataReader.
-                        //    dbConnection.Open();
-                        //    wCtx.Undo();
-                        //}
+                        resultsMessages.Items.Add($"Connecting as {currentUser.UserPrincipalName}");
                         using (WindowsImpersonationContext wi = ImpersonateEndUser(currentUser.UserPrincipalName))
                         {
                             try
                             {
-                                dbMessages.Items.Add("Impersonating");
+                                resultsMessages.Items.Add("Impersonating");
                                 dbConnection = new SqlConnection(sqlConnectionString.ToString());
-                                dbMessages.Items.Add("Opening DB");
+                                resultsMessages.Items.Add("Opening DB");
                                 dbConnection.Open();
                                 dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
-                                dbMessages.Items.Add("Running query");
+                                resultsMessages.Items.Add("Running query");
                                 dataadapter.Fill(ds, "data");
-                                dbMessages.Items.Add("Disabling impersonation");
+                                resultsMessages.Items.Add("Disabling impersonation");
                             }
                             catch (Exception ex)
                             {
-                                dbMessages.Items.Add("Error");
-                                ToggleMessage($"GetSQLData_Click::Could not get data {ex.ToString()}", databaseTabError, true);
+                                resultsMessages.Items.Add("Error");
+                                ToggleMessage($"GetSQLData_Click::Could not get data {ex.ToString()}", true);
                             }
                             finally
                             {
@@ -543,30 +224,31 @@ namespace IISSite.Pages.Secure.IWA
                     }
                     else
                     {
-                        dbMessages.Items.Add($"ERROR: {Request.LogonUserIdentity.Name} not found. Check UPN");
-                        ToggleMessage("GetSQLData_Click::Could not bind AD User", databaseTabError);
+                        resultsMessages.Items.Add($"ERROR: {Request.LogonUserIdentity.Name} not found. Check UPN");
+                        ToggleMessage("GetSQLData_Click::Could not bind AD User", true, true);
                     }
                 }
                 else
                 {
                     // Run the SQL statement, and then get the returned rows to the DataReader.
                     dbConnection = new SqlConnection(sqlConnectionString.ToString());
-                    dbMessages.Items.Add("Opening DB");
+                    resultsMessages.Items.Add("Opening DB");
                     dbConnection.Open();
                     dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
-                    dbMessages.Items.Add("Fetching data");
+                    resultsMessages.Items.Add("Fetching data");
                     dataadapter.Fill(ds, "data");
                 }
 
                 dbConnection.Close();
-                sqlDataGrid.DataSource = ds.Tables["data"].DefaultView;
-                sqlDataGrid.DataBind();
-                sqlResults.Visible = true;
+                dataResultsGrid.DataSource = ds.Tables["data"].DefaultView;
+                dataResultsGrid.DataBind();
+                dataResultsPanel.Visible = true;
+                resultsMessagePanel.Visible = true;
             }
             catch (Exception sqlex)
             {
-                ToggleMessage($"GetSQLData_Click::{sqlex.ToString()}", databaseTabError);
-                sqlResults.Visible = false;
+                ToggleMessage($"GetSQLData_Click::{sqlex.ToString()}", true, true);
+                dataResultsGrid.Visible = false;
             }
         }
 
@@ -592,16 +274,16 @@ namespace IISSite.Pages.Secure.IWA
             return wi.Impersonate();
         }
 
-        protected void FileShareBind_Click(object sender, EventArgs e)
+        protected void GetFileShareData_Click(object sender, EventArgs e)
         {
-            fileShareMsgs.Items.Clear();
+            ClearResultPanels();
 
             try
             {
                 string serverName = fileShareServerName.Text;
                 string fileFolderName = fileShareName.Text;
                 FileShareRootPath = $@"\\{serverName}\{fileFolderName}";
-                fileShareMsgs.Items.Add($"Fetching files from {FileShareRootPath}");
+                resultsMessages.Items.Add($"Fetching files from {FileShareRootPath}");
 
                 FileShareItem rootFileShareItem = new FileShareItem()
                 {
@@ -610,26 +292,37 @@ namespace IISSite.Pages.Secure.IWA
                     DisplayName = fileFolderName
                 };
 
-                fileShareMsgs.Items.Add("Binding folders");
+                resultsMessages.Items.Add("Binding folders");
                 BindFolders(rootFileShareItem);
 
-                fileShareMsgs.Items.Add("Binding files");
+                resultsMessages.Items.Add("Binding files");
                 BindFiles(rootFileShareItem);
+                resultsMessagePanel.Visible = true;
+                fileResultsPanel.Visible = true;
             }
             catch (Exception ex)
             {
-                ToggleMessage($"FileShareBind_Click::Error::{ex.ToString()}", fileshareTabError);
+                ToggleMessage($"FileShareBind_Click::Error::{ex.ToString()}", true, true);
             }
         }
 
-        private void BindFolders(FileShareItem fileShareItem)
+        private void ClearResultPanels()
         {
-            string currentPath = fileShareItem.ActualPath;
+            ToggleMessage("", false, false);
+            resultsMessages.Items.Clear();
+            resultsMessagePanel.Visible = false;
+            dataResultsPanel.Visible = false;
+            fileResultsPanel.Visible = false;
+        }
+
+        private void BindFolders(FileShareItem rootFileShareItem)
+        {
+            string currentPath = rootFileShareItem.ActualPath;
             DirectoryInfo currentDirectory = null;
             DirectoryInfo[] curFolders = null;
             DirectoryInfo currentParent = null;
 
-            fileShareMsgs.Items.Add($"BindFolders::{currentPath}");
+            resultsMessages.Items.Add($"BindFolders::{currentPath}");
             try
             {
                 //Impersonate the current user to get the files to browse
@@ -638,18 +331,16 @@ namespace IISSite.Pages.Secure.IWA
                     ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
                     if (currentUser != null)
                     {
-                        fileShareMsgs.Items.Add($"BindFolders::Impersonating user {currentUser.UserPrincipalName}");
-                        WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
-
-                        using (WindowsImpersonationContext wCtx = wi.Impersonate())
+                        resultsMessages.Items.Add($"BindFolders::Impersonating user {currentUser.UserPrincipalName}");
+                        using (WindowsImpersonationContext wi = ImpersonateEndUser(currentUser.UserPrincipalName))
                         {
                             try
                             {
-                                currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
-                                fileShareMsgs.Items.Add($"Current directory is {fileShareItem.ActualPath}");
+                                currentDirectory = new DirectoryInfo(rootFileShareItem.ActualPath);
+                                resultsMessages.Items.Add($"Current directory is {rootFileShareItem.ActualPath}");
                                 if (System.IO.Directory.Exists(currentPath))
                                 {
-                                    fileShareMsgs.Items.Add("Path exists, get directories");
+                                    resultsMessages.Items.Add("Path exists, get directories");
                                     curFolders = currentDirectory.GetDirectories();
                                     //if there are no children and we are not at the root, show parents
                                     if (currentDirectory.Parent != null)
@@ -658,36 +349,36 @@ namespace IISSite.Pages.Secure.IWA
                                         {
                                             //We are at the root
                                             currentParent = currentDirectory;
-                                            fileShareMsgs.Items.Add($"Current is root {currentParent}");
+                                            resultsMessages.Items.Add($"Current is root {currentParent}");
                                         }
                                     }
                                     else
                                     {
                                         //We are at the root
                                         currentParent = currentDirectory;
-                                        fileShareMsgs.Items.Add($"At the root. Set the parent to {currentParent}");
+                                        resultsMessages.Items.Add($"At the root. Set the parent to {currentParent}");
                                     }
                                 }
                             }
                             catch (Exception ex)
                             {
-                                fileShareMsgs.Items.Add("Error");
+                                resultsMessages.Items.Add("Error");
                             }
                             finally
                             {
-                                fileShareMsgs.Items.Add("Undoing impersonation");
-                                wCtx.Undo();
+                                resultsMessages.Items.Add("Undoing impersonation");
+                                wi.Undo();
                             }
                         }
                     }
                 }
                 else
                 {
-                    currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
-                    fileShareMsgs.Items.Add($"Looking for directory {currentDirectory}");
+                    currentDirectory = new DirectoryInfo(rootFileShareItem.ActualPath);
+                    resultsMessages.Items.Add($"Looking for directory {currentDirectory}");
                     if (System.IO.Directory.Exists(currentPath))
                     {
-                        fileShareMsgs.Items.Add("Path exists, get sub directories");
+                        resultsMessages.Items.Add("Path exists, get sub directories");
                         curFolders = currentDirectory.GetDirectories();
                         //if there are no children and we are not at the root, show parents
                         if (currentDirectory.Parent != null)
@@ -706,31 +397,33 @@ namespace IISSite.Pages.Secure.IWA
                     }
                 }
 
-                fileShareMsgs.Items.Add($"Bind folders {curFolders?.Length.ToString()}");
+                resultsMessages.Items.Add($"Bind folders {curFolders?.Length.ToString()}");
                 directoryList.DataSource = curFolders;
                 directoryList.DataBind();
 
-                fileShareMsgs.Items.Add($"Bind files with {currentPath}");
-                BindFiles(fileShareItem);
+                resultsMessages.Items.Add($"Bind files with {currentPath}");
+                BindFiles(rootFileShareItem);
 
                 //Build the breadcrumb for the page
-                fileShareMsgs.Items.Add($"Build breadcrumb with {currentPath}");
-                BuildBreadcrumb(fileShareItem.ParentFileShare, currentPath);
+                resultsMessages.Items.Add($"Build breadcrumb with {currentPath}");
+                BuildBreadcrumb(rootFileShareItem.ParentFileShare, currentPath);
+
+                resultsMessagePanel.Visible = true;
             }
             catch (System.Security.SecurityException)
             {
-                fileShareMsgs.Items.Add("ERROR Security exception");
-                ToggleMessage("BindFolders::Error SecurityException", fileshareTabError);
+                resultsMessages.Items.Add("ERROR Security exception");
+                ToggleMessage("BindFolders::Error SecurityException", true, true);
             }
             catch (System.UnauthorizedAccessException)
             {
-                fileShareMsgs.Items.Add("ERROR Unauthorized exception");
-                ToggleMessage("BindFolders::Error Unauthorized", fileshareTabError);
+                resultsMessages.Items.Add("ERROR Unauthorized exception");
+                ToggleMessage("BindFolders::Error Unauthorized", true, true);
             }
             catch (Exception ex)
             {
-                fileShareMsgs.Items.Add("ERROR");
-                ToggleMessage($"BindFolders::Error::{ex.ToString()}", fileshareTabError);
+                resultsMessages.Items.Add("ERROR");
+                ToggleMessage($"BindFolders::Error::{ex.ToString()}", true, true);
             }
         }
 
@@ -749,34 +442,34 @@ namespace IISSite.Pages.Secure.IWA
                     ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
                     if (currentUser != null)
                     {
-                        fileShareMsgs.Items.Add($"BindFiles::Impersonating user {currentUser.UserPrincipalName}");
+                        resultsMessages.Items.Add($"BindFiles::Impersonating user {currentUser.UserPrincipalName}");
                         WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
                         using (WindowsImpersonationContext wCtx = wi.Impersonate())
                         {
                             try
                             {
                                 currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
-                                fileShareMsgs.Items.Add($"BindFiles::Checking for files in directory {currentDirectory}");
+                                resultsMessages.Items.Add($"BindFiles::Checking for files in directory {currentDirectory}");
                                 if (System.IO.Directory.Exists(fileShareItem.ActualPath))
                                 {
-                                    fileShareMsgs.Items.Add("BindFiles::Getting files");
+                                    resultsMessages.Items.Add("BindFiles::Getting files");
                                     curDirFiles = currentDirectory.GetFiles();
-                                    fileShareMsgs.Items.Add($"BindFiles::Found {curDirFiles?.Length.ToString()} files");
+                                    resultsMessages.Items.Add($"BindFiles::Found {curDirFiles?.Length.ToString()} files");
                                     fileList.DataSource = curDirFiles;
                                     fileList.DataBind();
                                 }
                                 else
                                 {
-                                    fileShareMsgs.Items.Add("BindFiles::directory not found");
+                                    resultsMessages.Items.Add("BindFiles::directory not found");
                                 }
                             }
                             catch (Exception ex)
                             {
-                                fileShareMsgs.Items.Add("BindFiles::Error");
+                                resultsMessages.Items.Add("BindFiles::Error");
                             }
                             finally
                             {
-                                fileShareMsgs.Items.Add("BindFiles::Undo impersonation");
+                                resultsMessages.Items.Add("BindFiles::Undo impersonation");
                                 wCtx.Undo();
                             }
                         }
@@ -785,35 +478,36 @@ namespace IISSite.Pages.Secure.IWA
                 else
                 {
                     currentDirectory = new DirectoryInfo(fileShareItem.ActualPath);
-                    fileShareMsgs.Items.Add($"BindFiles::Checking for files in directory {currentDirectory}");
+                    resultsMessages.Items.Add($"BindFiles::Checking for files in directory {currentDirectory}");
                     if (System.IO.Directory.Exists(fileShareItem.ActualPath))
                     {
-                        fileShareMsgs.Items.Add("BindFiles::Getting files");
+                        resultsMessages.Items.Add("BindFiles::Getting files");
                         curDirFiles = currentDirectory.GetFiles();
-                        fileShareMsgs.Items.Add($"BindFiles::Found {curDirFiles?.Length.ToString()} files");
+                        resultsMessages.Items.Add($"BindFiles::Found {curDirFiles?.Length.ToString()} files");
                         fileList.DataSource = curDirFiles;
                         fileList.DataBind();
                     }
                     else
                     {
-                        fileShareMsgs.Items.Add("BindFiles::directory not found");
+                        resultsMessages.Items.Add("BindFiles::directory not found");
                     }
                 }
+                resultsMessagePanel.Visible = true;
             }
             catch (System.Security.SecurityException)
             {
-                fileShareMsgs.Items.Add("BindFiles::Security exception");
-                ToggleMessage("BindFiles::Error SecurityException", fileshareTabError);
+                resultsMessages.Items.Add("BindFiles::Security exception");
+                ToggleMessage("BindFiles::Error SecurityException", true, true);
             }
             catch (System.UnauthorizedAccessException)
             {
-                fileShareMsgs.Items.Add("BindFiles::Unauthorized");
-                ToggleMessage("BindFiles::Error Unauthorized", fileshareTabError);
+                resultsMessages.Items.Add("BindFiles::Unauthorized");
+                ToggleMessage("BindFiles::Error Unauthorized", true, true);
             }
             catch (Exception ex)
             {
-                fileShareMsgs.Items.Add("BindFiles::Error");
-                ToggleMessage($"BindFiles::Error::{ex.ToString()}", fileshareTabError);
+                resultsMessages.Items.Add("BindFiles::Error");
+                ToggleMessage($"BindFiles::Error::{ex.ToString()}", true, true);
             }
             //}
         }
@@ -821,9 +515,9 @@ namespace IISSite.Pages.Secure.IWA
         public void BuildBreadcrumb(string RootFileShare, string relativeFileSharePath)
         {
             //Remove the current root from the path and trim the extra backslashes
-            fileShareMsgs.Items.Add($"BuildBreadcrumb::RootFileShare={RootFileShare} Relative path={relativeFileSharePath}");
+            resultsMessages.Items.Add($"BuildBreadcrumb::RootFileShare={RootFileShare} Relative path={relativeFileSharePath}");
             string trimmedPath = relativeFileSharePath.Replace(RootFileShare, "")?.TrimStart('\\')?.TrimEnd('\\');
-            fileShareMsgs.Items.Add($"BuildBreadcrumb::trimmed path {trimmedPath}");
+            resultsMessages.Items.Add($"BuildBreadcrumb::trimmed path {trimmedPath}");
             //string trimmedPath = relativeFileSharePath.TrimStart('\\').TrimEnd('\\');
             string[] crumbPath = trimmedPath.Split('\\');
             List<HyperLink> links = new List<HyperLink>();
@@ -835,7 +529,7 @@ namespace IISSite.Pages.Secure.IWA
             };
             links.Add(link);
 
-            fileShareMsgs.Items.Add($"BuildBreadcrumb::Link1={link.NavigateUrl}");
+            resultsMessages.Items.Add($"BuildBreadcrumb::Link1={link.NavigateUrl}");
             string curPathNode = string.Empty;
             StringBuilder curPath = new StringBuilder();
             string currentNode = string.Empty;
@@ -843,7 +537,7 @@ namespace IISSite.Pages.Secure.IWA
             for (int i = 0; i < crumbPath.Length; i++)
             {
                 currentNode = crumbPath[i];
-                fileShareMsgs.Items.Add($"BuildBreadcrumb::Link {i.ToString()}={currentNode}");
+                resultsMessages.Items.Add($"BuildBreadcrumb::Link {i.ToString()}={currentNode}");
                 if (i + 1 != crumbPath.Length)
                 {
                     link = new HyperLink
@@ -854,7 +548,7 @@ namespace IISSite.Pages.Secure.IWA
                     link.NavigateUrl = UrlUtility.BuildFolderUri(curPath.ToString()).ToString();
                     links.Add(link);
                 }
-                fileShareMsgs.Items.Add($"BuildBreadcrumb::Link={link.NavigateUrl}");
+                resultsMessages.Items.Add($"BuildBreadcrumb::Link={link.NavigateUrl}");
                 curPathNode = currentNode;
             }
 
@@ -870,54 +564,126 @@ namespace IISSite.Pages.Secure.IWA
                 links.Add(lastNode);
             }
 
-            fileShareMsgs.Items.Add($"BuildBreadcrumb::Bind {links.Count.ToString()} links");
+            resultsMessages.Items.Add($"BuildBreadcrumb::Bind {links.Count.ToString()} links");
             breadcrumbLinks.DataSource = links;
             breadcrumbLinks.DataBind();
         }
 
-        protected void LdapBind_Click(object sender, EventArgs e)
+        protected void GetLdapData_Click(object sender, EventArgs e)
         {
+            ClearResultPanels();
+
             string fqdnToSearch = ldapDomainname.Text;
-            string searchString = Request.LogonUserIdentity.Name;
+            string searchString = ldapSearchString.Text;
+            SearchResultCollection searchResults = null;
+            string userSearchString = $"(&(objectCategory=user)(objectClass=user)(|(sAMAccountlName= **{searchString}**)(userPrincipalName=**{searchString}**)))";
+            string groupSeachString = $"(&(objectCategory=group)(objectClass=group)(|(name=**{searchString}**)(displayName=**{searchString}**)))";
+
+            resultsMessages.Items.Add($"LdapBind_Click::Searching {fqdnToSearch} for {searchString}");
 
             try
             {
-                DirectoryEntry rootEntry = new DirectoryEntry($@"LDAP://{fqdnToSearch}");
-                rootEntry.AuthenticationType = System.DirectoryServices.AuthenticationTypes.Secure;
-                SearchResultCollection searchResults = null;
-                DirectorySearcher searcher = new DirectorySearcher(rootEntry);
-                searcher.SearchScope = SearchScope.Subtree;
-                searcher.SizeLimit = 50;
-
-                switch (ldapUsersOrGroups.SelectedValue)
+                if (backendCallType.SelectedValue == "user")
                 {
-                    case "users":
+                    resultsMessages.Items.Add($"LdapBind_Click::Getting LDAP data as user {Request.LogonUserIdentity.Name}");
+
+                    ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
+                    if (currentUser != null)
+                    {
+                        resultsMessages.Items.Add($"BindFiles::Impersonating user {currentUser.UserPrincipalName}");
+                        WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
+
+                        using (WindowsImpersonationContext wCtx = wi.Impersonate())
                         {
-                            searcher.Filter = ("(&(objectCategory=person))");
-                            break;
+                            try
+                            {
+                                DirectoryEntry rootEntry = new DirectoryEntry($@"GC://{fqdnToSearch}")
+                                {
+                                    AuthenticationType = System.DirectoryServices.AuthenticationTypes.Secure
+                                };
+
+                                DirectorySearcher searcher = new DirectorySearcher(rootEntry)
+                                {
+                                    SearchScope = SearchScope.Subtree,
+                                    SizeLimit = 50
+                                };
+
+                                switch (ldapUsersOrGroups.SelectedValue)
+                                {
+                                    case "users":
+                                        {
+                                            searcher.Filter = userSearchString;
+                                            resultsMessages.Items.Add($"LdapBind_Click::Setting filter for for users using filter [{searcher.Filter}]");
+                                            break;
+                                        }
+                                    case "groups":
+                                        {
+                                            resultsMessages.Items.Add("LdapBind_Click::Setting filter for for groups");
+                                            searcher.Filter = ("(&(objectCategory=group))");
+                                            break;
+                                        }
+                                }
+
+                                searchResults = searcher.FindAll();
+                            }
+                            catch(Exception searchEx)
+                            {
+                                resultsMessages.Items.Add($"LdapBind_Click::ERROR Impersonating as {currentUser.UserPrincipalName} {searchEx.ToString()}");
+                            }
+                            finally
+                            {
+                                wCtx.Undo();
+                            }
                         }
-                    case "groups":
-                        {
-                            searcher.Filter = ("(&(objectCategory=group))");
-                            break;
-                        }
+                    }
+                    else
+                    {
+                        resultsMessages.Items.Add($"LdapBind_Click::ERROR {Request.LogonUserIdentity.Name} not found to impersonate");
+                    }
+                }
+                else
+                {
+                    resultsMessages.Items.Add("LdapBind_Click::Getting LDAP data as App Pool Account");
+
+                    DirectoryEntry rootEntry = new DirectoryEntry($@"LDAP://{fqdnToSearch}")
+                    {
+                        AuthenticationType = System.DirectoryServices.AuthenticationTypes.Secure
+                    };
+                    DirectorySearcher searcher = new DirectorySearcher(rootEntry)
+                    {
+                        SearchScope = SearchScope.Subtree,
+                        SizeLimit = 50
+                    };
+
+                    switch (ldapUsersOrGroups.SelectedValue)
+                    {
+                        case "users":
+                            {
+                                searcher.Filter = userSearchString;
+                                resultsMessages.Items.Add($"LdapBind_Click::Setting filter for for users using filter [{searcher.Filter}]");
+                                break;
+                            }
+                        case "groups":
+                            {
+                                resultsMessages.Items.Add("LdapBind_Click::Setting filter for for groups");
+                                searcher.Filter = ("(&(objectCategory=group))");
+                                break;
+                            }
+                    }
+
+                    searchResults = searcher.FindAll();
                 }
 
-                //TODO: If there are no results, toggle an error
-                searchResults = searcher.FindAll();
-                ldapDataGrid.DataSource = searchResults;
-                ldapDataGrid.DataBind();
-
-                //var queryFormat = "(&(objectClass=user)(objectCategory=person)(|(SAMAccountName=*{0}*)(cn=*{0}*)(gn=*{0}*)(sn=*{0}*)(email=*{0}*)))";
-                //searcher.Filter = string.Format(queryFormat, searchString);
-                //var searchResults = searcher.FindAll();
-                ////TODO: If there are no results, toggle an error
-                //ldapDataGrid.DataSource = searchResults;
-                //ldapDataGrid.DataBind();
+                resultsMessages.Items.Add($"LdapBind_Click::Found [{searchResults?.Count.ToString()}] results");
+                dataResultsGrid.DataSource = searchResults;
+                dataResultsGrid.DataBind();
+                dataResultsPanel.Visible = true;
+                resultsMessagePanel.Visible = true;
             }
             catch (Exception ex)
             {
-                ToggleMessage(ex.ToString(), ldapTabError);
+                resultsMessages.Items.Add("LdapBind_Click::ERROR");
+                ToggleMessage(ex.ToString(), true, true);
             }
         }
 
@@ -981,7 +747,7 @@ namespace IISSite.Pages.Secure.IWA
                         ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
                         if (currentUser != null)
                         {
-                            fileShareMsgs.Items.Add($"BindFiles::Impersonating user {currentUser.UserPrincipalName}");
+                            resultsMessages.Items.Add($"BindFiles::Impersonating user {currentUser.UserPrincipalName}");
                             WindowsIdentity wi = new WindowsIdentity(currentUser.UserPrincipalName);
 
                             using (WindowsImpersonationContext wCtx = wi.Impersonate())
@@ -1053,7 +819,7 @@ namespace IISSite.Pages.Secure.IWA
                 curLink = e.Item.FindControl("fileShareUrl") as HyperLink;
                 curLink.NavigateUrl = UrlUtility.BuildShareUri(curFileShare.ActualPath, curFileShare.DisplayName).ToString();
                 curLink.Text = curFileShare.DisplayName;
-                fileShareMsgs.Items.Add($"DirectoryList_ItemCommand::ListFiles {curFileShare.ActualPath}");
+                resultsMessages.Items.Add($"DirectoryList_ItemCommand::ListFiles {curFileShare.ActualPath}");
             }
         }
 
@@ -1065,7 +831,7 @@ namespace IISSite.Pages.Secure.IWA
                 var value = e.CommandArgument;
                 // Do whatever operation you want.  
                 FileShareItem fs = JsonConvert.DeserializeObject<FileShareItem>(e.CommandArgument.ToString());
-                fileShareMsgs.Items.Add($"DirectoryList_ItemCommand::ListFiles {fs.ActualPath}");
+                resultsMessages.Items.Add($"DirectoryList_ItemCommand::ListFiles {fs.ActualPath}");
                 BindFiles(fs);
                 BuildBreadcrumb(fs.ParentFileShare, fs.ActualPath);
             }
@@ -1073,76 +839,278 @@ namespace IISSite.Pages.Secure.IWA
 
         protected void MsmqQueueSendMessage_Click(object sender, EventArgs e)
         {
-            // check if queue exists, if not create it
-            MessageQueue msMq = null;
-            if (!MessageQueue.Exists(msmqQueueName.Text))
+            ClearResultPanels();
+
+             // check if queue exists, if not create it
+             MessageQueue msMq = null;
+            List<LogMessage> msmqMessages = new List<LogMessage>();
+
+            LogMessage logMessage = new LogMessage()
             {
-                msMq = MessageQueue.Create(msmqQueueName.Text);
-            }
-            else
-            {
-                msMq = new MessageQueue(msmqQueueName.Text);
-            }
+                Id = Guid.NewGuid().ToString(),
+                Created = DateTime.UtcNow,
+                Message = msmqQueueMsg.Text
+            };
+
+            resultsMessages.Items.Add($"MsmqQueueSendMessage_Click::Creating a new message {logMessage.Id}");
+
+            string qName = MsmqHelper.GetDirectFormatName(msmqMachineName.Text, msmqQueueName.Text, true);
+
             try
             {
-                LogMessage logMessage = new LogMessage()
+                //Impersonate the current user to get the files to browse
+                if (backendCallType.SelectedValue == "user")
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    Created = DateTime.UtcNow,
-                    Message = msmqQueueMsg.Text,
-                    Name = Request.LogonUserIdentity.Name
-                };
-                msMq.Send(logMessage);
+                    ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
+                    if (currentUser != null)
+                    {
+                        resultsMessages.Items.Add($"MsmqQueueSendMessage_Click::Impersonating user {currentUser.UserPrincipalName}");
+                        using (WindowsImpersonationContext wi = ImpersonateEndUser(currentUser.UserPrincipalName))
+                        {
+                            try
+                            {
+                                msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, true, true, true);
+
+                                if (msMq != null)
+                                {
+                                    msMq.Formatter = new XmlMessageFormatter(new Type[] { typeof(LogMessage) });
+                                    logMessage.Name = currentUser.UserPrincipalName;
+                                    msMq.Send(logMessage);
+                                    resultsMessages.Items.Add($"MsmqQueueSendMessage_Click::Message sent to queue {msMq.FormatName}");
+                                    resultsMessages.Items.Add($"MsmqQueueSendMessage_Click::reading messages from queue {msMq.FormatName}");
+                                    UpdateMsmqMessageCount();
+                                }
+                                else
+                                {
+                                    resultsMessages.Items.Add($"MsmqQueueSendMessage_Click::Queue {qName} could not be found or you do not have rights");
+                                }
+                                resultsMessagePanel.Visible = true;
+                                dataResultsPanel.Visible = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                resultsMessages.Items.Add("Error");
+                            }
+                            finally
+                            {
+                                resultsMessages.Items.Add("Undoing impersonation");
+                                if (msMq != null)
+                                {
+                                    msMq.Close();
+                                }
+                                wi.Undo();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, true, true, true);
+
+                    if (msMq != null)
+                    {
+                        msMq.Formatter = new XmlMessageFormatter(new Type[] { typeof(LogMessage) });
+                        logMessage.Name = WindowsIdentity.GetCurrent().Name;
+                        msMq.Send(logMessage);
+                        resultsMessages.Items.Add($"MsmqQueueSendMessage_Click::Message sent to queue {msMq.FormatName}");
+
+                        resultsMessages.Items.Add($"MsmqQueueSendMessage_Click::reading messages from queue {msMq.FormatName}");
+                        UpdateMsmqMessageCount();
+                    }
+                    else
+                    {
+                        resultsMessages.Items.Add($"MsmqQueueSendMessage_Click::Queue {qName} could not be found");
+                    }
+                    resultsMessagePanel.Visible = true;
+                    dataResultsPanel.Visible = true;
+                }
+            }
+            catch (System.Security.SecurityException)
+            {
+                resultsMessages.Items.Add("ERROR Security exception");
+                ToggleMessage("MsmqQueueSendMessage_Click::Error SecurityException", true, true);
+            }
+            catch (System.UnauthorizedAccessException)
+            {
+                resultsMessages.Items.Add("ERROR Unauthorized exception");
+                ToggleMessage("MsmqQueueSendMessage_Click::Error Unauthorized", true, true);
             }
             catch (MessageQueueException ee)
             {
-
+                resultsMessages.Items.Add("MsmqQueueSendMessage_Click::ERROR MessageQueue");
+                ToggleMessage($"MsmqQueueSendMessage_Click::ERROR {ee.ToString()}", true, true);
             }
             catch (Exception eee)
             {
-
+                resultsMessages.Items.Add("MsmqQueueSendMessage_Click::ERROR");
+                ToggleMessage($"MsmqQueueSendMessage_Click::ERROR {eee.ToString()}", true, true);
             }
             finally
             {
-                msMq.Close();
+                if (msMq!= null)
+                {
+                    msMq.Close();
+                }
             }
-            Console.WriteLine("Message sent ......");
-            UpdateMsmqMessageCount();
+        }
+
+        protected Message PeekWithoutTimeout(MessageQueue q, Cursor cursor, PeekAction action)
+        {
+            Message ret = null;
+            try
+            {
+                ret = q.Peek(new TimeSpan(1000), cursor, action);
+            }
+            catch (MessageQueueException mqe)
+            {
+                if (!mqe.Message.ToLower().Contains("timeout"))
+                {
+                    throw;
+                }
+            }
+            return ret;
+        }
+
+        protected int GetMessageCount(MessageQueue q, out List<LogMessage> messages)
+        {
+            int count = 0;
+            Cursor cursor = q.CreateCursor();
+            messages = new List<LogMessage>();
+            q.Formatter = new XmlMessageFormatter(new Type[] { typeof(LogMessage) });
+
+            Message m = PeekWithoutTimeout(q, cursor, PeekAction.Current);
+            if (m != null)
+            {
+                //Add the first message
+                LogMessage logMessage = (LogMessage)m.Body;
+                messages.Add(logMessage);
+
+                while ((m = PeekWithoutTimeout(q, cursor, PeekAction.Next)) != null)
+                {
+                    //Add the other messages in the qu
+                    logMessage = (LogMessage)m.Body;
+                    messages.Add(logMessage);
+                    count++;
+                }
+            }
+            return count;
         }
 
         protected void UpdateMsmqMessageCount()
         {
-            MessageQueue msMq = new MessageQueue(msmqQueueName.Text, QueueAccessMode.Peek);
-            long messageCount = msMq.GetAllMessages().Length;
+            string qName = MsmqHelper.GetDirectFormatName(msmqMachineName.Text, msmqQueueName.Text, true);
+            MessageQueue msMq = new MessageQueue(qName, QueueAccessMode.Peek);
+            long messageCount = GetMessageCount(msMq, out List<LogMessage> msmqMessages);
             msmqQueueMsgCount.Text = messageCount.ToString();
+            dataResultsGrid.DataSource = msmqMessages;
+            dataResultsGrid.DataBind();
+            dataResultsPanel.Visible = true;
+            dataResultsPanel.Visible = true;
+            resultsMessagePanel.Visible = true;
         }
 
         protected void MsmqQueueReadMessage_Click(object sender, EventArgs e)
         {
-            MessageQueue msMq = new MessageQueue(msmqQueueName.Text);
+            ClearResultPanels();
+
+
+            resultsMessages.Items.Add("MsmqQueueReadMessage_Click::Reading Messages");
+
+            MessageQueue msMq = null;
+
+            string qName = MsmqHelper.GetDirectFormatName(msmqMachineName.Text, msmqQueueName.Text, true);
 
             try
             {
+                //Impersonate the current user to get the files to browse
+                if (backendCallType.SelectedValue == "user")
+                {
+                    ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
+                    if (currentUser != null)
+                    {
+                        resultsMessages.Items.Add($"MsmqQueueReadMessage_Click::Impersonating user {currentUser.UserPrincipalName}");
+                        using (WindowsImpersonationContext wi = ImpersonateEndUser(currentUser.UserPrincipalName))
+                        {
+                            try
+                            {
+                                msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, true, true, true);
 
-                // msMq.Formatter = new XmlMessageFormatter(new Type[] {typeof(string)});
-                msMq.Formatter = new XmlMessageFormatter(new Type[] { typeof(LogMessage) });
-                var message = (LogMessage)msMq.Receive().Body;
-                msmqQueueReadMsg.Text = JsonConvert.SerializeObject(message);
+                                if (msMq != null)
+                                {
+                                    msMq.Formatter = new XmlMessageFormatter(new Type[] { typeof(LogMessage) });
+                                    resultsMessages.Items.Add($"MsmqQueueReadMessage_Click::reading messages from queue {msMq.FormatName}");
+                                    var message = (LogMessage)msMq.Receive().Body;
+                                    resultsMessages.Items.Add($"MsmqQueueReadMessage_Click::Message={JsonConvert.SerializeObject(message)}");
+                                    UpdateMsmqMessageCount();
+                                }
+                                else
+                                {
+                                    resultsMessages.Items.Add($"MsmqQueueReadMessage_Click::Queue {qName} could not be found or you do not have rights");
+                                }
+                                resultsMessagePanel.Visible = true;
+                                dataResultsPanel.Visible = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                resultsMessages.Items.Add("Error");
+                            }
+                            finally
+                            {
+                                resultsMessages.Items.Add("Undoing impersonation");
+                                if (msMq != null)
+                                {
+                                    msMq.Close();
+                                }
+                                wi.Undo();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, true, true, true);
+
+                    if (msMq != null)
+                    {
+                        msMq.Formatter = new XmlMessageFormatter(new Type[] { typeof(LogMessage) });
+                        resultsMessages.Items.Add($"MsmqQueueReadMessage_Click::reading messages from queue {msMq.FormatName}");
+                        var message = (LogMessage)msMq.Receive().Body;
+                        resultsMessages.Items.Add($"MsmqQueueReadMessage_Click::Message={JsonConvert.SerializeObject(message)}");
+                        UpdateMsmqMessageCount();
+                    }
+                    else
+                    {
+                        resultsMessages.Items.Add($"MsmqQueueReadMessage_Click::Queue {qName} could not be found");
+                    }
+                }
+            }
+            catch (System.Security.SecurityException)
+            {
+                resultsMessages.Items.Add("ERROR Security exception");
+                ToggleMessage("MsmqQueueReadMessage_Click::Error SecurityException", true, true);
+            }
+            catch (System.UnauthorizedAccessException)
+            {
+                resultsMessages.Items.Add("ERROR Unauthorized exception");
+                ToggleMessage("MsmqQueueReadMessage_Click::Error Unauthorized", true, true);
             }
             catch (MessageQueueException ee)
             {
-                Console.Write(ee.ToString());
+                resultsMessages.Items.Add("MsmqQueueReadMessage_Click::ERROR MessageQueue");
+                ToggleMessage($"MsmqQueueReadMessage_Click::ERROR {ee.ToString()}", true, true);
             }
             catch (Exception eee)
             {
-                Console.Write(eee.ToString());
+                resultsMessages.Items.Add("MsmqQueueReadMessage_Click::ERROR");
+                ToggleMessage($"MsmqQueueReadMessage_Click::ERROR {eee.ToString()}", true, true);
             }
             finally
             {
-                msMq.Close();
+                if (msMq != null)
+                {
+                    msMq.Close();
+                }
             }
-            Console.WriteLine("Message received ......");
-            UpdateMsmqMessageCount();
         }
 
         protected void MsmqQueueReadMessageCount_Click(object sender, EventArgs e)
