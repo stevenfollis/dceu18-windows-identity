@@ -108,7 +108,21 @@ RUN New-WebApplication `
 		-PSPath IIS:\ `
 		-Filter "/system.webServer/security/authentication/anonymousAuthentication" `
 		-Name "Enabled" `
-		-Value False;
+		-Value False; `
+	
+	Set-WebConfigurationProperty `
+		-PSPath 'MACHINE/WEBROOT/APPHOST/Default Web Site/Secure/IWA'  `
+		-Filter "system.webServer/security/authentication/windowsAuthentication" `
+		-Name "useAppPoolCredentials" `
+		-Value "True"
+
+# Enable verbose logging for kerberos in the Windows Event Viewer
+RUN New-ItemProperty `
+	-Path HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters `
+	-Name LogLevel `
+	-PropertyType DWord `
+	-Value 1 `
+	-Force
 
 # Check application health against anonymous endpoint
 HEALTHCHECK CMD powershell -command `  

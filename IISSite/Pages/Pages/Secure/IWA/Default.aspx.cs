@@ -155,15 +155,12 @@ namespace IISSite.Pages.Secure.IWA
             }
         }
 
-        private void ToggleMessage(string msg, bool isError = false, bool display = true)
+        private void ToggleMessage(string errMsg, bool isError = false, bool display = true)
         {
             resultsMessagePanel.Visible = display;
-            if (isError)
-            {
-                resultsErrorMessage.Text = msg;
-                resultsErrorMessage.Visible = display;
-                resultsErrorMessagePanel.Visible = display;
-            }
+            resultsErrorMessage.Text = errMsg;
+            resultsErrorMessage.Visible = isError;
+            resultsErrorMessagePanel.Visible = isError;
         }
 
         protected void GetSQLData_Click(object sender, EventArgs e)
@@ -180,11 +177,10 @@ namespace IISSite.Pages.Secure.IWA
                     IntegratedSecurity = true,
                     DataSource = dbServerName.Text,
                     InitialCatalog = dbDatabaseName.Text,
-                    //Authentication = SqlAuthenticationMethod.ActiveDirectoryIntegrated,
                     TrustServerCertificate = true
                 };
 
-                resultsMessages.Items.Add($"Connecting to [{sqlConnectionString.ToString()}] {backendCallType.SelectedValue}");
+                resultsMessages.Items.Add($"GetSQLData_Click::Connecting to [{sqlConnectionString.ToString()}] {backendCallType.SelectedValue}");
 
                 DataSet ds = new DataSet();
                 DataTable dt = new DataTable();
@@ -197,19 +193,19 @@ namespace IISSite.Pages.Secure.IWA
                     ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
                     if (currentUser != null)
                     {
-                        resultsMessages.Items.Add($"Connecting as {currentUser.UserPrincipalName}");
+                        resultsMessages.Items.Add($"GetSQLData_Click::Connecting as {currentUser.UserPrincipalName}");
                         using (WindowsImpersonationContext wi = ImpersonateEndUser(currentUser.UserPrincipalName))
                         {
                             try
                             {
-                                resultsMessages.Items.Add("Impersonating");
+                                resultsMessages.Items.Add("GetSQLData_Click::Impersonating");
                                 dbConnection = new SqlConnection(sqlConnectionString.ToString());
-                                resultsMessages.Items.Add("Opening DB");
+                                resultsMessages.Items.Add("GetSQLData_Click::Opening DB");
                                 dbConnection.Open();
                                 dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
-                                resultsMessages.Items.Add("Running query");
+                                resultsMessages.Items.Add("GetSQLData_Click::Running query");
                                 dataadapter.Fill(ds, "data");
-                                resultsMessages.Items.Add("Disabling impersonation");
+                                resultsMessages.Items.Add("GetSQLData_Click::Disabling impersonation");
                             }
                             catch (Exception ex)
                             {
@@ -224,7 +220,7 @@ namespace IISSite.Pages.Secure.IWA
                     }
                     else
                     {
-                        resultsMessages.Items.Add($"ERROR: {Request.LogonUserIdentity.Name} not found. Check UPN");
+                        resultsMessages.Items.Add($"GetSQLData_Click::ERROR: {Request.LogonUserIdentity.Name} not found. Check UPN");
                         ToggleMessage("GetSQLData_Click::Could not bind AD User", true, true);
                     }
                 }
@@ -232,17 +228,27 @@ namespace IISSite.Pages.Secure.IWA
                 {
                     // Run the SQL statement, and then get the returned rows to the DataReader.
                     dbConnection = new SqlConnection(sqlConnectionString.ToString());
-                    resultsMessages.Items.Add("Opening DB");
+                    resultsMessages.Items.Add("GetSQLData_Click::Opening DB");
                     dbConnection.Open();
                     dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
-                    resultsMessages.Items.Add("Fetching data");
+                    resultsMessages.Items.Add("GetSQLData_Click::Fetching data");
                     dataadapter.Fill(ds, "data");
                 }
 
                 dbConnection.Close();
-                dataResultsGrid.DataSource = ds.Tables["data"].DefaultView;
-                dataResultsGrid.DataBind();
-                dataResultsPanel.Visible = true;
+                if (ds != null)
+                {
+                    resultsMessages.Items.Add("GetSQLData_Click::Data found. Binding to view");
+                    dataResultsGrid.DataSource = ds.Tables["data"].DefaultView;
+                    dataResultsGrid.DataBind();
+
+                    dataResultsPanel.Visible = true;
+
+                }
+                else
+                {
+                    resultsMessages.Items.Add("GetSQLData_Click::ERROR:No data found.");
+                }
                 resultsMessagePanel.Visible = true;
             }
             catch (Exception sqlex)
@@ -254,19 +260,6 @@ namespace IISSite.Pages.Secure.IWA
 
         private WindowsImpersonationContext ImpersonateEndUser(string userUpn)
         {
-            // Obtain the user name (from forms authentication)
-            //string identity = User.Identity.Name;
-
-            // Convert from domainName\userName format to userName@domainName format
-            // if necessary
-            //int slash = identity.IndexOf("\\");
-            //if (slash > 0)
-            //{
-            //    string domain = identity.Substring(0, slash);
-            //    string user = identity.Substring(slash + 1);
-            //    identity = user + "@" + domain;
-            //}
-
             // The WindowsIdentity(string) constructor uses the new
             // Kerberos S4U extension to get a logon for the user
             // without a password.
