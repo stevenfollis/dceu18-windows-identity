@@ -105,15 +105,12 @@ namespace IISSite.Pages.Secure.Forms
             }
         }
 
-        private void ToggleMessage(string msg, bool isError = false, bool display = true)
+        private void ToggleMessage(string errMsg, bool isError = false, bool display = true)
         {
             resultsMessagePanel.Visible = display;
-            if (isError)
-            {
-                resultsErrorMessage.Text = msg;
-                resultsErrorMessage.Visible = display;
-                resultsErrorMessagePanel.Visible = display;
-            }
+            resultsErrorMessage.Text = errMsg;
+            resultsErrorMessage.Visible = isError;
+            resultsErrorMessagePanel.Visible = isError;
         }
 
         protected void GetSQLData_Click(object sender, EventArgs e)
