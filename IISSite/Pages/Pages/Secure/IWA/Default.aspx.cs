@@ -10,7 +10,6 @@ using System.Messaging;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
-using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using IISSite.Common.Helpers;
@@ -169,22 +168,22 @@ namespace IISSite.Pages.Secure.IWA
             ClearResultPanels();
 
             string sqlQuery = dbQuery.Text;
+            SqlConnection dbConnection = null;
+
+            SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder
+            {
+                IntegratedSecurity = true,
+                DataSource = dbServerName.Text,
+                InitialCatalog = dbDatabaseName.Text,
+                TrustServerCertificate = true
+            };
+
+            resultsMessages.Items.Add($"GetSQLData_Click::Connecting to [{sqlConnectionString.ToString()}] {backendCallType.SelectedValue}");
 
             try
             {
-                SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder
-                {
-                    IntegratedSecurity = true,
-                    DataSource = dbServerName.Text,
-                    InitialCatalog = dbDatabaseName.Text,
-                    TrustServerCertificate = true
-                };
-
-                resultsMessages.Items.Add($"GetSQLData_Click::Connecting to [{sqlConnectionString.ToString()}] {backendCallType.SelectedValue}");
-
                 DataSet ds = new DataSet();
                 DataTable dt = new DataTable();
-                SqlConnection dbConnection = null;
                 SqlDataAdapter dataadapter = null;
 
                 if (backendCallType.SelectedValue == "user")
@@ -235,7 +234,6 @@ namespace IISSite.Pages.Secure.IWA
                     dataadapter.Fill(ds, "data");
                 }
 
-                dbConnection.Close();
                 if (ds != null)
                 {
                     resultsMessages.Items.Add("GetSQLData_Click::Data found. Binding to view");
@@ -243,18 +241,24 @@ namespace IISSite.Pages.Secure.IWA
                     dataResultsGrid.DataBind();
 
                     dataResultsPanel.Visible = true;
+                    dataResultsGrid.Visible = true;
 
                 }
                 else
                 {
                     resultsMessages.Items.Add("GetSQLData_Click::ERROR:No data found.");
                 }
-                resultsMessagePanel.Visible = true;
             }
             catch (Exception sqlex)
             {
                 ToggleMessage($"GetSQLData_Click::{sqlex.ToString()}", true, true);
-                dataResultsGrid.Visible = false;
+                dataResultsPanel.Visible = false;
+            }
+            finally
+            {
+
+                dbConnection.Close();
+                resultsMessagePanel.Visible = true;
             }
         }
 
@@ -296,6 +300,10 @@ namespace IISSite.Pages.Secure.IWA
             catch (Exception ex)
             {
                 ToggleMessage($"FileShareBind_Click::Error::{ex.ToString()}", true, true);
+            }
+            finally
+            {
+                resultsMessagePanel.Visible = true;
             }
         }
 
@@ -619,7 +627,7 @@ namespace IISSite.Pages.Secure.IWA
 
                                 searchResults = searcher.FindAll();
                             }
-                            catch(Exception searchEx)
+                            catch (Exception searchEx)
                             {
                                 resultsMessages.Items.Add($"LdapBind_Click::ERROR Impersonating as {currentUser.UserPrincipalName} {searchEx.ToString()}");
                             }
@@ -677,6 +685,10 @@ namespace IISSite.Pages.Secure.IWA
             {
                 resultsMessages.Items.Add("LdapBind_Click::ERROR");
                 ToggleMessage(ex.ToString(), true, true);
+            }
+            finally
+            {
+                resultsMessagePanel.Visible = true;
             }
         }
 
@@ -834,8 +846,8 @@ namespace IISSite.Pages.Secure.IWA
         {
             ClearResultPanels();
 
-             // check if queue exists, if not create it
-             MessageQueue msMq = null;
+            // check if queue exists, if not create it
+            MessageQueue msMq = null;
             List<LogMessage> msmqMessages = new List<LogMessage>();
 
             LogMessage logMessage = new LogMessage()
@@ -914,7 +926,6 @@ namespace IISSite.Pages.Secure.IWA
                     {
                         resultsMessages.Items.Add($"MsmqQueueSendMessage_Click::Queue {qName} could not be found");
                     }
-                    resultsMessagePanel.Visible = true;
                     dataResultsPanel.Visible = true;
                 }
             }
@@ -940,10 +951,11 @@ namespace IISSite.Pages.Secure.IWA
             }
             finally
             {
-                if (msMq!= null)
+                if (msMq != null)
                 {
                     msMq.Close();
                 }
+                resultsMessagePanel.Visible = true;
             }
         }
 
@@ -1005,7 +1017,6 @@ namespace IISSite.Pages.Secure.IWA
         protected void MsmqQueueReadMessage_Click(object sender, EventArgs e)
         {
             ClearResultPanels();
-
 
             resultsMessages.Items.Add("MsmqQueueReadMessage_Click::Reading Messages");
 
@@ -1103,6 +1114,7 @@ namespace IISSite.Pages.Secure.IWA
                 {
                     msMq.Close();
                 }
+                resultsMessagePanel.Visible = true;
             }
         }
 
