@@ -83,7 +83,7 @@
                         </ul>
                     </div>
                     <div class="card-footer">
-                        <a class="btn btn-primary" href="http://dceu-windev-01.corp.winid.net/secure/iwa">GO</a>
+                        <a class="btn btn-primary" href="/secure/iwa">GO</a>
                     </div>
                 </div>
 
@@ -99,7 +99,7 @@
                         </ul>
                     </div>
                     <div class="card-footer">
-                        <a class="btn btn-primary" href="http://dceu-windev-01.corp.winid.net/secure/iwa">GO</a>
+                        <a class="btn btn-primary" href="/secure/iwa">GO</a>
                     </div>
                 </div>
             </div>

@@ -7,7 +7,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Web.Security;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 using IISSite.Common.Helpers;
 using IISSite.Common.Models;
 
@@ -85,9 +84,10 @@ namespace IISSite.Pages.Secure.Forms
                 ToggleMessage($"BindClaimsTab::Error{ex.ToString()}", true, true);
             }
         }
+
         protected void BindUserData()
         {
-             loginName.Text = User.Identity.Name;
+            loginName.Text = User.Identity.Name;
         }
 
         protected void BindGroupsTab()
@@ -118,22 +118,22 @@ namespace IISSite.Pages.Secure.Forms
             ClearResultPanels();
             // Open the connection.
             string sqlQuery = dbQuery.Text;
+            SqlConnection dbConnection = null; SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder
+            {
+                IntegratedSecurity = true,
+                DataSource = dbServerName.Text,
+                InitialCatalog = dbDatabaseName.Text,
+                TrustServerCertificate = true
+            };
+
+            resultsMessages.Items.Add($"Connecting to [{sqlConnectionString.ToString()}]");
 
             try
             {
-                SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder
-                {
-                    IntegratedSecurity = true,
-                    DataSource = dbServerName.Text,
-                    InitialCatalog = dbDatabaseName.Text,
-                    TrustServerCertificate = true
-                };
-
-                resultsMessages.Items.Add($"Connecting to [{sqlConnectionString.ToString()}]");
 
                 DataSet ds = new DataSet();
                 DataTable dt = new DataTable();
-                SqlConnection dbConnection = null;
+
                 SqlDataAdapter dataadapter = null;
 
                 // Run the SQL statement, and then get the returned rows to the DataReader.
@@ -144,16 +144,28 @@ namespace IISSite.Pages.Secure.Forms
                 resultsMessages.Items.Add("Fetching data");
                 dataadapter.Fill(ds, "data");
 
-                dbConnection.Close();
-                dataResultsGrid.DataSource = ds.Tables["data"].DefaultView;
-                dataResultsGrid.DataBind();
-                dataResultsPanel.Visible = true;
-                resultsMessagePanel.Visible = true;
+                if (ds != null)
+                {
+                    dataResultsGrid.DataSource = ds.Tables["data"].DefaultView;
+                    dataResultsGrid.DataBind();
+                    dataResultsPanel.Visible = true;
+                }
             }
             catch (Exception sqlex)
             {
                 ToggleMessage($"GetSQLData_Click::{sqlex.ToString()}", true, true);
                 resultsMessagePanel.Visible = false;
+            }
+            finally
+            {
+                if (dbConnection != null)
+                {
+                    if (dbConnection.State == ConnectionState.Open)
+                    {
+                        dbConnection.Close();
+                    }
+                }
+                resultsMessagePanel.Visible = true;
             }
         }
 
