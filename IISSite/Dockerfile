@@ -120,7 +120,7 @@ RUN New-WebApplication `
 		-PSPath IIS:\ `
 		-Filter "/system.webServer/security/authentication/anonymousAuthentication" `
 		-Name "Enabled" `
-		-Value False; 
+		-Value False; `
     
 	Set-WebConfigurationProperty `
 		-PSPath 'MACHINE/WEBROOT/APPHOST/Site/Secure/IWA'  `
