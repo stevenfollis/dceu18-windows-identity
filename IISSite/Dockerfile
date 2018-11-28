@@ -35,6 +35,10 @@ WORKDIR C:\site
 RUN Import-Module "WebAdministration"; `
 	Install-WindowsFeature "Web-Windows-Auth";
 
+	#Install-WindowsFeature "MSMQ";	
+RUN Import-Module "ServerManager"; `
+	Enable-WindowsOptionalFeature -FeatureName "MSMQ" -Online -NoRestart;
+
 # Enable IIS Remote Administration
 RUN net user localadmin Qwerty123456 /add; `
 	net localgroup Administrators localadmin /add; `
@@ -44,7 +48,7 @@ RUN net user localadmin Qwerty123456 /add; `
 # Setup IIS Server
 RUN New-WebAppPool "GMSATestPool"; `
 
-	# Configure AppPool to run as LocalSystem 
+	# Configure root AppPool to run as LocalSystem 
 	Set-ItemProperty `
 		-Path "IIS:\AppPools\GMSATestPool" `
 		-Name "processModel" `
@@ -71,7 +75,15 @@ RUN New-WebAppPool "GMSATestPool"; `
 		-PSPath IIS:\ `
 		-Filter "system.webServer/security/authentication/anonymousAuthentication" `
 		-Name "enabled" `
-		-Value $true;
+		-Value $true; `
+
+	# Configure the IWA App Authentication
+	Set-WebConfigurationProperty `
+		-PSPATH 'MACHINE/WEBROOT/APPHOST/SITE/Secure/IWA' `
+		-Filter "system.webServer/security/Authentication/windowsAuthentication" `
+		-Name "useAppPoolCredentials" `
+		-Value $true `
+		-Force
 
 # Copy compiled files from Builder Stage
 COPY --from=builder C:\site\ c:\site\
@@ -109,12 +121,13 @@ RUN New-WebApplication `
 		-Filter "/system.webServer/security/authentication/anonymousAuthentication" `
 		-Name "Enabled" `
 		-Value False; 
-	
-	#Set-WebConfigurationProperty `
-	#	-PSPath 'MACHINE/WEBROOT/APPHOST/Site/Secure/IWA'  `
-	#	-Filter "system.webServer/security/authentication/windowsAuthentication" `
-	#	-Name "useAppPoolCredentials" `
-	#	-Value "True"
+    
+	Set-WebConfigurationProperty `
+		-PSPath 'MACHINE/WEBROOT/APPHOST/Site/Secure/IWA'  `
+		-Filter "system.webServer/security/authentication/windowsAuthentication" `
+		-Name "useAppPoolCredentials" `
+		-Value "True" `
+		-Force
 
 # Enable verbose logging for kerberos in the Windows Event Viewer
 RUN New-ItemProperty `

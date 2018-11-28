@@ -35,7 +35,7 @@ namespace IISSite.Common.Helpers
                 Scheme = HttpContext.Current.Request.Url.Scheme,
                 Host = HttpContext.Current.Request.Url.Host,
                 Port = HttpContext.Current.Request.Url.Port,
-                Path = HttpContext.Current.Request.Url.AbsolutePath
+                Path = HttpContext.Current.Request.ApplicationPath + HttpContext.Current.Request.Url.AbsolutePath
             };
             string folderQString = $"{GetCleanQueryString()}&{QSTRINGPATH}={HttpContext.Current.Server.UrlEncode(rootFileShare)}";
             folderUri.Query = folderQString;
