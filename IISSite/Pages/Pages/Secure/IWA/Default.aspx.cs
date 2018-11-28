@@ -256,8 +256,13 @@ namespace IISSite.Pages.Secure.IWA
             }
             finally
             {
-
-                dbConnection.Close();
+                if (dbConnection != null)
+                {
+                    if (dbConnection.State == ConnectionState.Open)
+                    {
+                        dbConnection.Close();
+                    }
+                }
                 resultsMessagePanel.Visible = true;
             }
         }
@@ -294,7 +299,7 @@ namespace IISSite.Pages.Secure.IWA
 
                 resultsMessages.Items.Add("Binding files");
                 BindFiles(rootFileShareItem);
-                resultsMessagePanel.Visible = true;
+
                 fileResultsPanel.Visible = true;
             }
             catch (Exception ex)
@@ -312,6 +317,7 @@ namespace IISSite.Pages.Secure.IWA
             ToggleMessage("", false, false);
             resultsMessages.Items.Clear();
             resultsMessagePanel.Visible = false;
+            dataResultsGrid.DataSource = null;
             dataResultsPanel.Visible = false;
             fileResultsPanel.Visible = false;
         }
@@ -409,7 +415,6 @@ namespace IISSite.Pages.Secure.IWA
                 resultsMessages.Items.Add($"Build breadcrumb with {currentPath}");
                 BuildBreadcrumb(rootFileShareItem.ParentFileShare, currentPath);
 
-                resultsMessagePanel.Visible = true;
             }
             catch (System.Security.SecurityException)
             {
@@ -425,6 +430,10 @@ namespace IISSite.Pages.Secure.IWA
             {
                 resultsMessages.Items.Add("ERROR");
                 ToggleMessage($"BindFolders::Error::{ex.ToString()}", true, true);
+            }
+            finally
+            {
+                resultsMessagePanel.Visible = true;
             }
         }
 
