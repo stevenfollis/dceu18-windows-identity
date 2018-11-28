@@ -354,7 +354,8 @@
                                             <asp:Label ID="loginInfoError" runat="server"></asp:Label>
                                         </asp:Panel>
                                         <div>
-                                            <h3>Hello <b><asp:Label ID="loginName" CssClass="ms-uppercase" runat="server"></asp:Label></b></h3>
+                                            <h3>Hello <b>
+                                                <asp:Label ID="loginName" CssClass="ms-uppercase" runat="server"></asp:Label></b></h3>
                                             <p>
                                                 You authenticated on <b><%= Server.MachineName %></b><br />
                                                 using AuthenticationType: <b><%= Request.LogonUserIdentity.AuthenticationType %></b><br />
@@ -374,5 +375,6 @@
                     </div>
                 </div>
             </div>
+        </div>
     </form>
 </asp:Content>

@@ -101,6 +101,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\font-awesome.css" />
     <Content Include="Content\font-awesome.min.css" />
+    <Content Include="Content\sagrada.jpg" />
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="Page.html" />
     <Content Include="Scripts\bootstrap.bundle.js" />

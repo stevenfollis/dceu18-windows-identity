@@ -24,18 +24,10 @@
     <form runat="server">
         <asp:ScriptManager runat="server"></asp:ScriptManager>
 
-        <section class="jumbotron jumbotron-fluid">
+        <section class="jumbotron jumbotron-fluid" style="background-image: url('/content/sagrada.jpg')">
             <div class="container">
-                <h1 class="display-3">Hello <b>
-                    <asp:Label ID="loginName" CssClass="ms-uppercase" runat="server"></asp:Label></b></h1>
-                <p class="lead">
-                    User <b><%= Request.LogonUserIdentity.Name %></b> authenticated on <b><%= Server.MachineName %></b><br />
-                    using AuthenticationType:<b><%= Request.LogonUserIdentity.AuthenticationType %></b><br />
-                    with impersonation level:<b> <%= Request.LogonUserIdentity.ImpersonationLevel %></b><br />
-                    App Pool running as:<b> <%= System.Security.Principal.WindowsIdentity.GetCurrent().Name %></b><br />
-                    From: <b>
-                        <asp:Label ID="UserSourceLocation" CssClass="ms-uppercase" runat="server" /></b>
-                </p>
+                <h1 class="display-4 text-white text-center">Hello from <%= Server.MachineName %></h1>
+                <div class="h-25 d-inline-block"></div>
             </div>
         </section>
 
