@@ -77,8 +77,9 @@ RUN New-WebAppPool "GMSATestPool"; `
 		-Name "enabled" `
 		-Value $true; `
 
-	# Remove Lock
-	Remove-WebConfigurationLock -Filter //security; `
+	Remove-WebConfigurationLock `
+		-Filter "system.webServer/security/Authentication/windowsAuthentication" `
+		-Force `
 
 	# Configure the IWA App Authentication
 	Set-WebConfigurationProperty `
