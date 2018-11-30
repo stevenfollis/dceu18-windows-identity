@@ -19,9 +19,9 @@ namespace IISSite.Common.Helpers
             //Make the URL relative
             UriBuilder newFileUri = new UriBuilder
             {
-                Scheme = HttpContext.Current.Request.Url.Scheme,
-                Host = HttpContext.Current.Request.Url.Host,
-                Port = HttpContext.Current.Request.Url.Port,
+                //Scheme = HttpContext.Current.Request.Url.Scheme,
+                //Host = HttpContext.Current.Request.Url.Host,
+                //Port = HttpContext.Current.Request.Url.Port,
                 Path = HttpContext.Current.Request.ApplicationPath + relativePath
             };
             return newFileUri.Uri;
@@ -32,9 +32,9 @@ namespace IISSite.Common.Helpers
             //string relativePath = fullFolderName.Replace(rootFileShare, "");
             UriBuilder folderUri = new UriBuilder
             {
-                Scheme = HttpContext.Current.Request.Url.Scheme,
-                Host = HttpContext.Current.Request.Url.Host,
-                Port = HttpContext.Current.Request.Url.Port,
+                //Scheme = HttpContext.Current.Request.Url.Scheme,
+                //Host = HttpContext.Current.Request.Url.Host,
+                //Port = HttpContext.Current.Request.Url.Port,
                 Path = HttpContext.Current.Request.ApplicationPath + HttpContext.Current.Request.Url.AbsolutePath
             };
             string folderQString = $"{GetCleanQueryString()}&{QSTRINGPATH}={HttpContext.Current.Server.UrlEncode(rootFileShare)}";
@@ -47,9 +47,9 @@ namespace IISSite.Common.Helpers
             //Make the URL relative
             UriBuilder fileShareUri = new UriBuilder
             {
-                Scheme = HttpContext.Current.Request.Url.Scheme,
-                Host = HttpContext.Current.Request.Url.Host,
-                Port = HttpContext.Current.Request.Url.Port,
+                //Scheme = HttpContext.Current.Request.Url.Scheme,
+                //Host = HttpContext.Current.Request.Url.Host,
+                //Port = HttpContext.Current.Request.Url.Port,
                 Path = HttpContext.Current.Request.ApplicationPath + HttpContext.Current.Request.Url.AbsolutePath
             };
             string fileQString = $"{GetCleanQueryString()}&{QSTRINGPATH}={HttpContext.Current.Server.UrlEncode(ShareDisplayName)}";

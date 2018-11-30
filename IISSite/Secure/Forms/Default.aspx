@@ -18,7 +18,8 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-2">
+                    <!--Col 1-->
+                    <div class="col-md-3">
                         <div class="accordion" id="dataCommands">
                             <div class="card">
                                 <div class="card-header" id="sqlCommandSection">
@@ -48,7 +49,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-8">
+                    <!--Col 2-->
+                    <div class="col-md-7">
                         <div class="card">
                             <div class="card-header">
                                 <asp:Panel ID="resultsMessagePanel" CssClass="alert alert-success" runat="server" Visible="false">
@@ -67,6 +69,7 @@
                             </div>
                         </div>
                     </div>
+                    <!--Col 3-->
                     <div class="col-md-2">
                         <div class="btn-group-vertical">
                             <!-- Button trigger modal -->

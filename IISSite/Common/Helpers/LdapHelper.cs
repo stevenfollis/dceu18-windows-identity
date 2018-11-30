@@ -63,7 +63,6 @@ namespace IISSite.Common.Helpers
                         ParentForest = userDomain.Forest,
                     };
                 }
-
             }
             catch(Exception ex)
             {

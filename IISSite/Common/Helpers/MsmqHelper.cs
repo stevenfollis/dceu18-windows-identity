@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Messaging;
 using System.Net;
+using System.Web.UI.WebControls;
 using Microsoft.Win32;
 
 namespace IISSite.Common.Helpers
@@ -53,19 +55,20 @@ namespace IISSite.Common.Helpers
         {
             return (privateQueue) ? string.Format("{0}\\private$\\{1}", machineName, qname) : string.Format("{0}\\{1}", machineName, qname);
         }
-        public static MessageQueue GetOrCreateQueue(string qMachineName, string qName, bool isPrivate, bool forceUseDirectName = false, bool MustAllowSend = true, bool MustAllowRead = true)
+
+        public static MessageQueue GetOrCreateQueue(string qMachineName, string qName, bool isPrivate, out StringCollection resultsMessages, bool forceUseDirectName = false, bool MustAllowSend = true, bool MustAllowRead = true)
         {
             MessageQueue mq = null;
             string directQueueName = string.Empty;
             string friendlyQueueName = string.Empty;
             bool canRead = false;
-            bool canCreate = false;
-            bool canDelete = false;
-            bool canPeek = false;
-            bool canPurge = false;
-            bool canRecieve = false;
-            bool canGetProps = false;
-            bool canGetPerms = false;
+            //bool canCreate = false;
+            //bool canDelete = false;
+            //bool canPeek = false;
+            //bool canPurge = false;
+            //bool canRecieve = false;
+            //bool canGetProps = false;
+            //bool canGetPerms = false;
             bool canSend = false;
             bool isLocalQ = IsQueueLocal(qMachineName);
             bool isUsingHttp = qMachineName.ToLower().StartsWith("http");
@@ -73,12 +76,14 @@ namespace IISSite.Common.Helpers
             bool.TryParse(Registry.LocalMachine.GetValue(@"SOFTWARE\Microsoft\MSMQ\Parameters\Workgroup")?.ToString(), out bool isWorkgroupMode);
             bool.TryParse(Registry.LocalMachine.GetValue(@"SOFTWARE\Microsoft\MSMQ\Parameters\Setup\AlwaysWithoutDS")?.ToString(), out bool alwaysDS);
 
+            resultsMessages = new StringCollection();
+
             //If the queue is remote, need to see how to create the correct name
             if (forceUseDirectName)
             {
                 directQueueName = MsmqHelper.GetDirectFormatName(qMachineName, qName, isPrivate);
                 friendlyQueueName = directQueueName;
-                Console.WriteLine($"GetOrCreateQueue::Force Using the direct name {directQueueName}");
+                resultsMessages.Add($"GetOrCreateQueue::Force Using the direct name {directQueueName}");
             }
             else
             {
@@ -86,13 +91,13 @@ namespace IISSite.Common.Helpers
                 {
                     directQueueName = MsmqHelper.GetDirectFormatName(qMachineName, qName, isPrivate);
                     friendlyQueueName = MsmqHelper.GetQueueName(qMachineName, qName, isPrivate);
-                    Console.WriteLine($"GetOrCreateQueue::Remote queue and not in domain mode, use the direct name {directQueueName}");
+                    resultsMessages.Add($"GetOrCreateQueue::Remote queue and not in domain mode, use the direct name {directQueueName}");
                 }
                 else
                 {
                     directQueueName = MsmqHelper.GetQueueName(qMachineName, qName, isPrivate);
                     friendlyQueueName = directQueueName;
-                    Console.WriteLine($"GetOrCreateQueue::Remote or local queue and in domain mode, use the name {directQueueName}");
+                    resultsMessages.Add($"GetOrCreateQueue::Remote or local queue and in domain mode, use the name {directQueueName}");
                 }
             }
 
@@ -102,7 +107,7 @@ namespace IISSite.Common.Helpers
             //In workgroup mode, you can use direct format names to open any 
             //  public or private queue for sending messages, or to open local and remote private queues for reading messages.
 
-            Console.WriteLine($"GetOrCreateQueue::Trying to get queue {directQueueName}");
+            resultsMessages.Add($"GetOrCreateQueue::Trying to get queue {directQueueName}");
 
             //Try to get the queue and see what we can do with it
             if (!isUsingHttp)
@@ -110,26 +115,25 @@ namespace IISSite.Common.Helpers
                 try
                 {
                     //See if we can read. Use the direct name
-                    Console.WriteLine($"GetOrCreateQueue::Try to read the queue using format name {directQueueName}");
+                    resultsMessages.Add($"GetOrCreateQueue::Try to read the queue using format name {directQueueName}");
                     mq = new MessageQueue(directQueueName, QueueAccessMode.Peek);
                     canRead = mq.CanRead;
                 }
                 catch (Exception rex)
                 {
-                    Console.WriteLine($"GetOrCreateQueue::CanReadException {directQueueName}::{rex.ToString()}");
-
+                    resultsMessages.Add($"GetOrCreateQueue::CanReadException {directQueueName}::{rex.ToString()}");
                 }
 
                 try
                 {
                     //See if we can send. Use the direct name
-                    Console.WriteLine($"GetOrCreateQueue::Try to send a message to the queue using format name {directQueueName}");
+                    resultsMessages.Add($"GetOrCreateQueue::Try to send a message to the queue using format name {directQueueName}");
                     mq = new MessageQueue(directQueueName, QueueAccessMode.Send);
                     canSend = mq.CanWrite;
                 }
                 catch (Exception sendex)
                 {
-                    Console.WriteLine($"GetOrCreateQueue::CanSendException {directQueueName}::{sendex.ToString()}");
+                    resultsMessages.Add($"GetOrCreateQueue::CanSendException {directQueueName}::{sendex.ToString()}");
                 }
             }
             else
@@ -142,7 +146,7 @@ namespace IISSite.Common.Helpers
 
             try
             {
-                Console.WriteLine($"GetOrCreateQueue::Get the queue using format name {directQueueName}");
+                resultsMessages.Add($"GetOrCreateQueue::Get the queue using format name {directQueueName}");
                 QueueAccessMode queueAccessMode;
 
                 if (MustAllowRead && canRead && MustAllowSend && canSend)
@@ -159,6 +163,7 @@ namespace IISSite.Common.Helpers
                 }
                 else
                 {
+                    resultsMessages.Add($"GetOrCreateQueue::Queue access requested is not allowed CanRead:{canRead} CanSend:{canSend}");
                     throw new Exception($"GetOrCreateQueue::Queue access requested is not allowed CanRead:{canRead} CanSend:{canSend}");
                 }
 
@@ -169,6 +174,7 @@ namespace IISSite.Common.Helpers
             }
             catch (Exception ex)
             {
+                resultsMessages.Add($"GetOrCreateQueue::Could not get the queue using format name:[{qName}] Path:[{directQueueName}]::{ex.ToString()}");
                 throw new ArgumentOutOfRangeException($"GetOrCreateQueue::Could not get the queue using format name:[{qName}] Path:[{directQueueName}]::{ex.ToString()}");
             }
 

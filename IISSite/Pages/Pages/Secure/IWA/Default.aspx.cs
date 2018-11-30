@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data;
 using System.Data.SqlClient;
 using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
+using System.DirectoryServices.ActiveDirectory;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -58,6 +61,13 @@ namespace IISSite.Pages.Secure.IWA
         protected global::System.Web.UI.WebControls.Repeater fileShareList;
         protected global::System.Web.UI.WebControls.Repeater directoryList;
         protected global::System.Web.UI.WebControls.Repeater fileList;
+        protected global::System.Web.UI.WebControls.Panel GMSAInfoErrorPanel;
+        protected global::System.Web.UI.WebControls.Label GMSAInfoError;
+        protected global::System.Web.UI.WebControls.Label gmsaName;
+        protected global::System.Web.UI.WebControls.Label gmsaSPNs;
+        protected global::System.Web.UI.WebControls.Label gmsaAccountControl;
+        protected global::System.Web.UI.WebControls.Label gmsaDelegationInfo;
+        protected global::System.Web.UI.WebControls.Label gmsaSid;
 
         public string FileShareRootPath { get; private set; }
         #endregion
@@ -71,7 +81,18 @@ namespace IISSite.Pages.Secure.IWA
                 BindClaimsTab();
                 BindGroupsTab();
                 BindImpersonationOptions();
+                BindGmsaInfo();
             }
+        }
+
+        private void BindGmsaInfo()
+        {
+            ADUser gmsa = GetGmsaInfo();
+            gmsaName.Text = gmsa.SamAccountName;
+            gmsaSPNs.Text = gmsa.ServicePrincipalNames;
+            gmsaAccountControl.Text = gmsa.UserAccountControl;
+            gmsaDelegationInfo.Text = gmsa.AllowedToDelegateTo;
+            gmsaSid.Text = gmsa.Sid.ToString();
         }
 
         private void BindImpersonationOptions()
@@ -170,21 +191,18 @@ namespace IISSite.Pages.Secure.IWA
             string sqlQuery = dbQuery.Text;
             SqlConnection dbConnection = null;
 
-            SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder
-            {
-                IntegratedSecurity = true,
-                DataSource = dbServerName.Text,
-                InitialCatalog = dbDatabaseName.Text,
-                TrustServerCertificate = true
-            };
-
-            resultsMessages.Items.Add($"GetSQLData_Click::Connecting to [{sqlConnectionString.ToString()}] {backendCallType.SelectedValue}");
-
             try
             {
                 DataSet ds = new DataSet();
-                DataTable dt = new DataTable();
                 SqlDataAdapter dataadapter = null;
+                SqlConnectionStringBuilder sqlConnectionString = new SqlConnectionStringBuilder
+                {
+                    IntegratedSecurity = true,
+                    DataSource = dbServerName.Text,
+                    InitialCatalog = dbDatabaseName.Text,
+                    TrustServerCertificate = true
+                };
+
 
                 if (backendCallType.SelectedValue == "user")
                 {
@@ -192,27 +210,26 @@ namespace IISSite.Pages.Secure.IWA
                     ADUser currentUser = LdapHelper.GetAdUser(Request.LogonUserIdentity.Name);
                     if (currentUser != null)
                     {
-                        resultsMessages.Items.Add($"GetSQLData_Click::Connecting as {currentUser.UserPrincipalName}");
+                        resultsMessages.Items.Add($"GetSQLData_Click::Impersonating as {currentUser.UserPrincipalName}");
                         using (WindowsImpersonationContext wi = ImpersonateEndUser(currentUser.UserPrincipalName))
                         {
                             try
                             {
-                                resultsMessages.Items.Add("GetSQLData_Click::Impersonating");
+                                resultsMessages.Items.Add($"GetSQLData_Click::Connecting to [{sqlConnectionString.ToString()}] {backendCallType.SelectedValue}");
                                 dbConnection = new SqlConnection(sqlConnectionString.ToString());
                                 resultsMessages.Items.Add("GetSQLData_Click::Opening DB");
                                 dbConnection.Open();
                                 dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
                                 resultsMessages.Items.Add("GetSQLData_Click::Running query");
                                 dataadapter.Fill(ds, "data");
-                                resultsMessages.Items.Add("GetSQLData_Click::Disabling impersonation");
                             }
                             catch (Exception ex)
                             {
-                                resultsMessages.Items.Add("Error");
-                                ToggleMessage($"GetSQLData_Click::Could not get data {ex.ToString()}", true);
+                                resultsMessages.Items.Add($"GetSQLData_Click::Could not get data {ex.ToString()}");
                             }
                             finally
                             {
+                                resultsMessages.Items.Add("GetSQLData_Click::Disabling impersonation");
                                 wi.Undo();
                             }
                         }
@@ -242,7 +259,6 @@ namespace IISSite.Pages.Secure.IWA
 
                     dataResultsPanel.Visible = true;
                     dataResultsGrid.Visible = true;
-
                 }
                 else
                 {
@@ -260,6 +276,7 @@ namespace IISSite.Pages.Secure.IWA
                 {
                     if (dbConnection.State == ConnectionState.Open)
                     {
+                        resultsMessages.Items.Add("GetSQLData_Click::Closing DB connection.");
                         dbConnection.Close();
                     }
                 }
@@ -579,6 +596,65 @@ namespace IISSite.Pages.Secure.IWA
             breadcrumbLinks.DataBind();
         }
 
+        protected ADUser GetGmsaInfo()
+        {
+            string currentUser = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+            SearchResultCollection searchResults = null;
+            ADUser gmsaUser = null;
+            // set up domain context
+            PrincipalContext ctx = new PrincipalContext(ContextType.Domain);
+
+            // find a user
+            Principal user = Principal.FindByIdentity(ctx, currentUser);
+
+            if (user != null)
+            {
+                Domain userDomain = Domain.GetCurrentDomain();
+                string userSearchString = $"(&(objectClass=msDS-GroupManagedServiceAccount)((sAMAccountName={user.SamAccountName})))";
+
+                DirectoryEntry rootEntry = new DirectoryEntry($@"LDAP://{userDomain}")
+                {
+                    AuthenticationType = System.DirectoryServices.AuthenticationTypes.Secure
+                };
+                DirectorySearcher searcher = new DirectorySearcher(rootEntry)
+                {
+                    SearchScope = SearchScope.Subtree,
+                    SizeLimit = 50,
+                };
+
+                searcher.PropertiesToLoad.Add("servicePrincipalName");
+                searcher.PropertiesToLoad.Add("userAccountControl");
+                searcher.PropertiesToLoad.Add("msDS-AllowedToDelegateTo");
+                searcher.Filter = userSearchString;
+                resultsMessages.Items.Add($"LdapBind_Click::Setting filter for for users using filter [{searcher.Filter}]");
+                searchResults = searcher.FindAll();
+                if (searchResults.Count ==1)
+                {
+                    SearchResult result = searchResults[0];
+                    //Fill out the rest of the user infor
+                    gmsaUser = new ADUser()
+                    {
+                        SamAccountName = user.SamAccountName,
+                        AllowedToDelegateTo = ParseProp(result.Properties["msDS-AllowedToDelegateTo"]),
+                        ServicePrincipalNames = ParseProp(result.Properties["servicePrincipalName"]),
+                        UserAccountControl = ParseProp(result.Properties["userAccountControl"]),
+                        Sid = user.Sid
+                    };
+                }
+            }
+            return gmsaUser;
+        }
+
+        private string ParseProp(ResultPropertyValueCollection resultPropertyValueCollection)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach(var r in resultPropertyValueCollection)
+            {
+                stringBuilder.AppendFormat("[{0}] ", r.ToString());
+            }
+            return stringBuilder.ToString();
+        }
+
         protected void GetLdapData_Click(object sender, EventArgs e)
         {
             ClearResultPanels();
@@ -588,6 +664,8 @@ namespace IISSite.Pages.Secure.IWA
             SearchResultCollection searchResults = null;
             string userSearchString = $"(&(objectCategory=user)(objectClass=user)(|(sAMAccountlName= **{searchString}**)(userPrincipalName=**{searchString}**)))";
             string groupSeachString = $"(&(objectCategory=group)(objectClass=group)(|(name=**{searchString}**)(displayName=**{searchString}**)))";
+
+            ADUser gmsa = GetGmsaInfo();
 
             resultsMessages.Items.Add($"LdapBind_Click::Searching {fqdnToSearch} for {searchString}");
 
@@ -857,7 +935,8 @@ namespace IISSite.Pages.Secure.IWA
 
             // check if queue exists, if not create it
             MessageQueue msMq = null;
-            List<LogMessage> msmqMessages = new List<LogMessage>();
+            StringCollection queMsgs = null;
+            //List<LogMessage> msmqMessages = new List<LogMessage>();
 
             LogMessage logMessage = new LogMessage()
             {
@@ -883,7 +962,13 @@ namespace IISSite.Pages.Secure.IWA
                         {
                             try
                             {
-                                msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, true, true, true);
+                                msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, out queMsgs, true, true);
+                                
+                                //Add any messages from the call for debugging
+                                foreach (string s in queMsgs)
+                                {
+                                    resultsMessages.Items.Add(s);
+                                }
 
                                 if (msMq != null)
                                 {
@@ -903,13 +988,14 @@ namespace IISSite.Pages.Secure.IWA
                             }
                             catch (Exception ex)
                             {
-                                resultsMessages.Items.Add("Error");
+                                resultsMessages.Items.Add($"MsmqQueueSendMessage_Click::Error {ex.ToString()}");
                             }
                             finally
                             {
-                                resultsMessages.Items.Add("Undoing impersonation");
+                                resultsMessages.Items.Add("MsmqQueueSendMessage_Click::Undoing impersonation");
                                 if (msMq != null)
                                 {
+                                    resultsMessages.Items.Add("MsmqQueueSendMessage_Click::Closing MSMQ Queue");
                                     msMq.Close();
                                 }
                                 wi.Undo();
@@ -919,8 +1005,13 @@ namespace IISSite.Pages.Secure.IWA
                 }
                 else
                 {
-                    msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, true, true, true);
+                    msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, out queMsgs, true, true);
 
+                    //Add any messages from the call for debugging
+                    foreach (string s in queMsgs)
+                    {
+                        resultsMessages.Items.Add(s);
+                    }
                     if (msMq != null)
                     {
                         msMq.Formatter = new XmlMessageFormatter(new Type[] { typeof(LogMessage) });
@@ -1007,7 +1098,7 @@ namespace IISSite.Pages.Secure.IWA
                     count++;
                 }
             }
-            return count;
+            return messages.Count;
         }
 
         protected void UpdateMsmqMessageCount()
@@ -1030,6 +1121,7 @@ namespace IISSite.Pages.Secure.IWA
             resultsMessages.Items.Add("MsmqQueueReadMessage_Click::Reading Messages");
 
             MessageQueue msMq = null;
+            StringCollection queMsgs = null;
 
             string qName = MsmqHelper.GetDirectFormatName(msmqMachineName.Text, msmqQueueName.Text, true);
 
@@ -1046,7 +1138,13 @@ namespace IISSite.Pages.Secure.IWA
                         {
                             try
                             {
-                                msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, true, true, true);
+                                msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, out queMsgs, true, true);
+
+                                //Add any messages from the call for debugging
+                                foreach (string s in queMsgs)
+                                {
+                                    resultsMessages.Items.Add(s);
+                                }
 
                                 if (msMq != null)
                                 {
@@ -1081,8 +1179,13 @@ namespace IISSite.Pages.Secure.IWA
                 }
                 else
                 {
-                    msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, true, true, true);
+                    msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, out queMsgs, true, true);
 
+                    //Add any messages from the call for debugging
+                    foreach (string s in queMsgs)
+                    {
+                        resultsMessages.Items.Add(s);
+                    }
                     if (msMq != null)
                     {
                         msMq.Formatter = new XmlMessageFormatter(new Type[] { typeof(LogMessage) });

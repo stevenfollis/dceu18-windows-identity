@@ -1,0 +1,25 @@
+{
+	"CmsPlugins": [
+		"ActiveDirectory"
+	],
+	"DomainJoinConfig": {
+		"Sid": "S-1-5-21-1377523796-2563064692-4151516951",
+		"MachineAccountName": "gmsa-follis",
+		"Guid": "7cbc5c6a-7b74-4ed6-b6d4-bd7fc63ea43f",
+		"DnsTreeName": "corp.winid.net",
+		"DnsName": "corp.winid.net",
+		"NetBiosName": "WNIDNET"
+	},
+	"ActiveDirectoryConfig": {
+		"GroupManagedServiceAccounts": [
+			{
+				"Name": "gmsa-follis",
+				"Scope": "corp.winid.net"
+			},
+			{
+				"Name": "gmsa-follis",
+				"Scope": "WNIDNET"
+			}
+		]
+	}
+}
