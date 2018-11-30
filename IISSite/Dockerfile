@@ -77,6 +77,10 @@ RUN New-WebAppPool "GMSATestPool"; `
 		-Name "enabled" `
 		-Value $true; `
 
+	Remove-WebConfigurationLock `
+		-Filter "system.webServer/security/Authentication/windowsAuthentication" `
+		-Force `
+
 	# Configure the IWA App Authentication
 	Set-WebConfigurationProperty `
 		-PSPATH 'MACHINE/WEBROOT/APPHOST/SITE/Secure/IWA' `
