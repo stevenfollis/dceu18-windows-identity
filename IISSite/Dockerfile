@@ -54,12 +54,6 @@ RUN New-WebAppPool "GMSATestPool"; `
 		-Name "processModel" `
 		-Value @{identitytype=0}; `
 
-	# Start AppPool automatically (no "cold start")
-	Set-ItemProperty `
-		-Path "IIS:\AppPools\GMSATestPool" `
-		-Name "startMode" `
-		-Value "AlwaysRunning"; `
-
 	# Replace Default Web Site
 	Remove-WebSite -Name 'Default Web Site'; `
 	
@@ -83,7 +77,7 @@ RUN New-WebAppPool "GMSATestPool"; `
 		-Filter "system.webServer/security/Authentication/windowsAuthentication" `
 		-Name "useAppPoolCredentials" `
 		-Value $true `
-		-Force
+		-Force;
 
 # Copy compiled files from Builder Stage
 COPY --from=builder C:\site\ c:\site\
@@ -108,10 +102,6 @@ RUN New-WebApplication `
 		-Name "Enabled" `
 		-Value $True; `
 
-	Remove-WebConfigurationLock `
-		-Filter "system.webServer/security/Authentication/windowsAuthentication" `
-		-Force `
-				
 	Set-WebConfigurationProperty `
 		-Location "Site/Secure/IWA" `
 		-PSPath IIS:\ `
@@ -125,13 +115,13 @@ RUN New-WebApplication `
 		-Filter "/system.webServer/security/authentication/anonymousAuthentication" `
 		-Name "Enabled" `
 		-Value False; `
-    
+
 	Set-WebConfigurationProperty `
-		-PSPath 'MACHINE/WEBROOT/APPHOST/Site/Secure/IWA'  `
-		-Filter "system.webServer/security/authentication/windowsAuthentication" `
-		-Name "useAppPoolCredentials" `
-		-Value "True" `
-		-Force
+		-pspath 'MACHINE/WEBROOT/APPHOST' `
+		-location 'Site' `
+		-filter "system.webServer/security/authentication/windowsAuthentication" `
+		-name "useAppPoolCredentials" `
+		-value "True";
 
 # Enable verbose logging for kerberos in the Windows Event Viewer
 RUN New-ItemProperty `

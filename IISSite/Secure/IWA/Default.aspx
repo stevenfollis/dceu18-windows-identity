@@ -144,6 +144,24 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card">
+                        <div class="card-header" id="gmsaCommandSection">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#gmsaCommands" aria-expanded="false" aria-controls="gmsaCommands">
+                                    GMSA Information
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="gmsaCommands" class="collapse" aria-labelledby="gmsaCommandSection" data-parent="#dataCommands">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="gmsaName">GMSA Name</label>
+                                    <asp:TextBox ID="gmsaName" CssClass="form-control ms-uppercase" runat="server"></asp:TextBox>
+                                </div>
+                                <asp:Button OnClick="GetGmsaData_Click" ID="gmsaBind" Text="Get GMSA info" runat="server" CssClass="btn btn-primary" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!--Col2-->
@@ -264,6 +282,84 @@
                                         </asp:Repeater>
                                     </table>
                                 </asp:Panel>
+                                <asp:Panel ID="gmsaResultsPanel" runat="server" Visible="false">
+                                    <asp:Panel ID="GMSAInfoErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
+                                        <asp:Label ID="GMSAInfoError" runat="server"></asp:Label>
+                                    </asp:Panel>
+                                    <ul class="list-group">
+                                        <li class="list-group-item">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <h5>sAMAccountName:</h5>
+                                                    <small class="text-muted">i.e. DOMAIN\GMSA_NAME$</small>
+                                                </div>
+                                                <div class="col">
+                                                    <p class="mb-1">
+                                                        <asp:Label ID="gmsaSamAccountName" runat="server"></asp:Label>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <h5>SID:</h5>
+                                                </div>
+                                                <div class="col">
+                                                    <p class="mb-1">
+                                                        <asp:Label ID="gmsaSid" runat="server"></asp:Label>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <h5>SPNs:</h5>
+                                                    <small class="text-muted">i.e. HTTP/GMSAName & HTTP/GMSANAME.FQDN</small>
+                                                </div>
+                                                <div class="col">
+                                                    <p class="mb-1">
+                                                        <asp:Label ID="gmsaSPNs" runat="server"></asp:Label>
+                                                    </p>
+
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <h5>UserAccount Control:</h5>
+                                                    <ul>
+                                                        <li><small class="text-muted">NORMAL_ACCOUNT = 512</small></li>
+                                                        <li><small class="text-muted">INTERDOMAIN_TRUST_ACCOUNT = 2048</small></li>
+                                                        <li><small class="text-muted">WORKSTATION_TRUST_ACCOUNT = 4096</small></li>
+                                                        <li><small class="text-muted">TRUSTED_FOR_DELEGATION = 524288</small></li>
+                                                        <li><small class="text-muted">TRUSTED_TO_AUTH_FOR_DELEGATION = 16777216</small></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="col">
+                                                    <p class="mb-1">
+                                                        <asp:Label ID="gmsaAccountControl" runat="server"></asp:Label>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <h5>ms-AllowedToDelegateTo:</h5>
+                                                    <small class="text-muted">i.e. LDAP/DCNAME.FQDN, MSSQLSvc/SQL.FQDN:1433</small>
+                                                </div>
+                                                <div class="col">
+                                                    <p class="mb-1">
+                                                        <asp:Label ID="gmsaDelegationInfo" runat="server"></asp:Label>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </asp:Panel>
                             </div>
                         </ContentTemplate>
                     </asp:UpdatePanel>
@@ -281,9 +377,6 @@
                     </button>
                     <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#loginInfoModal">
                         View Login Info
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#GMSAInfoModal">
-                        View GMSA Info
                     </button>
                     <!-- Claims Modal -->
                     <div class="modal" id="claimsModal" tabindex="-1" role="dialog" aria-labelledby="claimsModalTitle" aria-hidden="true">
@@ -369,69 +462,6 @@
                                                 <asp:Label ID="UserSourceLocation" CssClass="ms-uppercase" runat="server" /></b>
                                         </p>
                                     </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- GMSAInfoModal -->
-                    <div class="modal" id="GMSAInfoModal" tabindex="-1" role="dialog" aria-labelledby="GMSAInfoModalTitle" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="GMSAInfoModalTitle">GMSA Information</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <asp:Panel ID="GMSAInfoErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
-                                        <asp:Label ID="GMSAInfoError" runat="server"></asp:Label>
-                                    </asp:Panel>
-                                    <ul class="list-group">
-                                        <li class="list-group-item">
-                                            <h5>sAMAccountName:</h5>
-                                            <p class="mb-1">
-                                                <asp:Label ID="gmsaName" runat="server"></asp:Label>
-                                            </p>
-                                            <small class="text-muted">i.e. DOMAIN\GMSAName$.</small>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <h5>SID:</h5>
-                                            <p class="mb-1">
-                                                <asp:Label ID="gmsaSid" runat="server"></asp:Label>
-                                            </p>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <h5>SPNs:</h5>
-                                            <p class="mb-1">
-                                                <asp:Label ID="gmsaSPNs" runat="server"></asp:Label>
-                                            </p>
-                                            <small class="text-muted">i.e. HTTP/GMSAName & HTTP/GMSANAME.FQDN</small>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <h5>UserAccount Control:</h5>
-                                            <p class="mb-1">
-                                                <asp:Label ID="gmsaAccountControl" runat="server"></asp:Label>
-                                            </p>
-                                            <ul>
-                                                <li><small class="text-muted">NORMAL_ACCOUNT = 512</small></li>
-                                                <li><small class="text-muted">INTERDOMAIN_TRUST_ACCOUNT = 2048</small></li>
-                                                <li><small class="text-muted">WORKSTATION_TRUST_ACCOUNT = 4096</small></li>
-                                                <li><small class="text-muted">TRUSTED_FOR_DELEGATION = 524288</small></li>
-                                                <li><small class="text-muted">TRUSTED_TO_AUTH_FOR_DELEGATION = 16777216</small></li>
-                                            </ul>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <h5>ms-AllowedToDelegateTo:</h5>
-                                            <p class="mb-1">
-                                                <asp:Label ID="gmsaDelegationInfo" runat="server"></asp:Label>
-                                            </p>
-                                            <small class="text-muted">i.e. LDAP/DCNAME.FQDN, MSSQLSvc/SQL.FQDN:1433</small>
-                                        </li>
-                                    </ul>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
