@@ -36,7 +36,8 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-2">
+            <!--Col1-->
+            <div class="col-md-3">
                 <div class="accordion" id="dataCommands">
                     <div class="card">
                         <div class="card-header" id="sqlCommandSection">
@@ -80,9 +81,9 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="dbDatabaseName">Users or groups</label>
-                                    <asp:RadioButtonList ID="ldapUsersOrGroups" runat="server">
-                                        <asp:ListItem Text="Users (matches sAMAccountName or UPN)" Value="users" Selected="True"></asp:ListItem>
-                                        <asp:ListItem Text="Groups (matches Name or DisplayName)" Value="groups"></asp:ListItem>
+                                    <asp:RadioButtonList ID="ldapUsersOrGroups" runat="server" CssClass="custom-radio">
+                                        <asp:ListItem Text="Users (sAMAccountName or UPN)" Value="users" Selected="True"></asp:ListItem>
+                                        <asp:ListItem Text="Groups (Name or DisplayName)" Value="groups"></asp:ListItem>
                                     </asp:RadioButtonList>
                                 </div>
                                 <div class="form-group">
@@ -145,27 +146,26 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-8">
+            <!--Col2-->
+            <div class="col-md-7">
+                <h3>Specify how to make calls to the backend services:</h3>
+                <div class="input-group border">
+                    <div class="input-group-prepend m-3">
+                        <asp:RadioButtonList ID="backendCallType" runat="server" AutoPostBack="false" RepeatDirection="Vertical" CssClass="custom-radio">
+                        </asp:RadioButtonList>
+                    </div>
+                </div>
                 <div class="card">
-                    <div class="card-header">
-                        <p class="lead">Specify how to make calls to the backend services:</p>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                    <asp:RadioButtonList ID="backendCallType" runat="server" AutoPostBack="false" RepeatDirection="Vertical">
-                                    </asp:RadioButtonList>
-                                </div>
-                            </div>
-                        </div>
-                        <asp:UpdatePanel runat="server" RenderMode="Inline" UpdateMode="Conditional" ValidateRequestMode="Disabled">
-                            <ContentTemplate>
+                    <asp:UpdatePanel runat="server" RenderMode="Inline" UpdateMode="Conditional" ValidateRequestMode="Disabled">
+                        <ContentTemplate>
+                            <div class="card-header">
                                 <asp:Panel ID="resultsMessagePanel" CssClass="alert alert-success" runat="server" Visible="false">
-                                    <asp:ListBox ID="resultsMessages" CssClass="custom-select" runat="server"></asp:ListBox>
+                                    <asp:ListBox ID="resultsMessages" CssClass="custom-select" runat="server" size="3"></asp:ListBox>
                                 </asp:Panel>
                                 <asp:Panel ID="resultsErrorMessagePanel" CssClass="alert alert-danger" runat="server" Visible="false">
                                     <asp:Label ID="resultsErrorMessage" runat="server" Visible="false"></asp:Label>
                                 </asp:Panel>
-                                </div>
+                            </div>
                             <div class="card-body">
                                 <h5 class="card-title">Data results</h5>
                                 <asp:Panel ID="dataResultsPanel" runat="server" Visible="false">
@@ -265,110 +265,176 @@
                                     </table>
                                 </asp:Panel>
                             </div>
-                            </ContentTemplate>
-                        </asp:UpdatePanel>
-                    </div>
+                        </ContentTemplate>
+                    </asp:UpdatePanel>
                 </div>
-                <div class="col-md-2">
-                    <div class="btn-group-vertical">
-                        <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#claimsModal">
-                            View Claims
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#windowsCtxModal">
-                            View Windows context
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#loginInfoModal">
-                            View Login Info
-                        </button>
-                        <!-- Claims Modal -->
-                        <div class="modal" id="claimsModal" tabindex="-1" role="dialog" aria-labelledby="claimsModalTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="claimsModalTitle">Claims Infomrmation</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <asp:Panel ID="claimsTabErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
-                                            <asp:Label ID="claimsTabError" runat="server"></asp:Label>
-                                        </asp:Panel>
-                                        <p>
-                                            <asp:DataGrid ID="claimsGrid" runat="server" CssClass="table table-striped table-bordered table-condensed table-responsive">
-                                                <Columns>
-                                                    <asp:BoundColumn DataField="Type" HeaderText="Type"></asp:BoundColumn>
-                                                    <asp:BoundColumn DataField="Value" HeaderText="Value"></asp:BoundColumn>
-                                                </Columns>
-                                            </asp:DataGrid>
-                                        </p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                                    </div>
+            </div>
+            <!--Col3-->
+            <div class="col-md-2">
+                <div class="btn-group-vertical">
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#claimsModal">
+                        View Claims
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#windowsCtxModal">
+                        View Windows context
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#loginInfoModal">
+                        View Login Info
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#GMSAInfoModal">
+                        View GMSA Info
+                    </button>
+                    <!-- Claims Modal -->
+                    <div class="modal" id="claimsModal" tabindex="-1" role="dialog" aria-labelledby="claimsModalTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="claimsModalTitle">Claims Infomrmation</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <asp:Panel ID="claimsTabErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
+                                        <asp:Label ID="claimsTabError" runat="server"></asp:Label>
+                                    </asp:Panel>
+                                    <p>
+                                        <asp:DataGrid ID="claimsGrid" runat="server" CssClass="table table-striped table-bordered table-condensed table-responsive">
+                                            <Columns>
+                                                <asp:BoundColumn DataField="Type" HeaderText="Type"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="Value" HeaderText="Value"></asp:BoundColumn>
+                                            </Columns>
+                                        </asp:DataGrid>
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
                                 </div>
                             </div>
                         </div>
-                        <!-- WindowsCtxModal -->
-                        <div class="modal" id="windowsCtxModal" tabindex="-1" role="dialog" aria-labelledby="windowsCtxModalTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="windowsCtxModalTitle">Windows Context Infomrmation</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <asp:Panel ID="winPrincipalTabErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
-                                            <asp:Label ID="winPrincipalTabError" runat="server"></asp:Label>
-                                        </asp:Panel>
-                                        <p>
-                                            <asp:DataGrid ID="userGroupsGrid" runat="server" AutoGenerateColumns="false" CssClass="table table-striped table-bordered table-condensed table-responsive">
-                                                <Columns>
-                                                    <asp:BoundColumn DataField="Name" HeaderText="Name"></asp:BoundColumn>
-                                                    <asp:BoundColumn DataField="DisplayName" HeaderText="Display Name"></asp:BoundColumn>
-                                                </Columns>
-                                            </asp:DataGrid>
-                                        </p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                                    </div>
+                    </div>
+                    <!-- WindowsCtxModal -->
+                    <div class="modal" id="windowsCtxModal" tabindex="-1" role="dialog" aria-labelledby="windowsCtxModalTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="windowsCtxModalTitle">Windows Context Infomrmation</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <asp:Panel ID="winPrincipalTabErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
+                                        <asp:Label ID="winPrincipalTabError" runat="server"></asp:Label>
+                                    </asp:Panel>
+                                    <p>
+                                        <asp:DataGrid ID="userGroupsGrid" runat="server" AutoGenerateColumns="false" CssClass="table table-striped table-bordered table-condensed table-responsive">
+                                            <Columns>
+                                                <asp:BoundColumn DataField="Name" HeaderText="Name"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="DisplayName" HeaderText="Display Name"></asp:BoundColumn>
+                                            </Columns>
+                                        </asp:DataGrid>
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
                                 </div>
                             </div>
                         </div>
-                        <!-- LoginInfoModal -->
-                        <div class="modal" id="LoginInfoModal" tabindex="-1" role="dialog" aria-labelledby="LoginInfoModalTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="LoginInfoTitle">Login Information</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
+                    </div>
+                    <!-- LoginInfoModal -->
+                    <div class="modal" id="LoginInfoModal" tabindex="-1" role="dialog" aria-labelledby="LoginInfoModalTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="LoginInfoTitle">Login Information</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <asp:Panel ID="loginInfoErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
+                                        <asp:Label ID="loginInfoError" runat="server"></asp:Label>
+                                    </asp:Panel>
+                                    <div>
+                                        <h3>Hello <b>
+                                            <asp:Label ID="loginName" CssClass="ms-uppercase" runat="server"></asp:Label></b></h3>
+                                        <p>
+                                            You authenticated on <b><%= Server.MachineName %></b><br />
+                                            using AuthenticationType: <b><%= Request.LogonUserIdentity.AuthenticationType %></b><br />
+                                            with impersonation level: <b><%= Request.LogonUserIdentity.ImpersonationLevel %></b><br />
+                                            App Pool running as: <b><%= System.Security.Principal.WindowsIdentity.GetCurrent().Name %></b><br />
+                                            From: <b>
+                                                <asp:Label ID="UserSourceLocation" CssClass="ms-uppercase" runat="server" /></b>
+                                        </p>
                                     </div>
-                                    <div class="modal-body">
-                                        <asp:Panel ID="loginInfoErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
-                                            <asp:Label ID="loginInfoError" runat="server"></asp:Label>
-                                        </asp:Panel>
-                                        <div>
-                                            <h3>Hello <b>
-                                                <asp:Label ID="loginName" CssClass="ms-uppercase" runat="server"></asp:Label></b></h3>
-                                            <p>
-                                                You authenticated on <b><%= Server.MachineName %></b><br />
-                                                using AuthenticationType: <b><%= Request.LogonUserIdentity.AuthenticationType %></b><br />
-                                                with impersonation level: <b><%= Request.LogonUserIdentity.ImpersonationLevel %></b><br />
-                                                App Pool running as: <b><%= System.Security.Principal.WindowsIdentity.GetCurrent().Name %></b><br />
-                                                From: <b>
-                                                    <asp:Label ID="UserSourceLocation" CssClass="ms-uppercase" runat="server" /></b>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- GMSAInfoModal -->
+                    <div class="modal" id="GMSAInfoModal" tabindex="-1" role="dialog" aria-labelledby="GMSAInfoModalTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="GMSAInfoModalTitle">GMSA Information</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <asp:Panel ID="GMSAInfoErrorPanel" CssClass="alert alert-danger" runat="server" Visible="false">
+                                        <asp:Label ID="GMSAInfoError" runat="server"></asp:Label>
+                                    </asp:Panel>
+                                    <ul class="list-group">
+                                        <li class="list-group-item">
+                                            <h5>sAMAccountName:</h5>
+                                            <p class="mb-1">
+                                                <asp:Label ID="gmsaName" runat="server"></asp:Label>
                                             </p>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                                    </div>
+                                            <small class="text-muted">i.e. DOMAIN\GMSAName$.</small>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <h5>SID:</h5>
+                                            <p class="mb-1">
+                                                <asp:Label ID="gmsaSid" runat="server"></asp:Label>
+                                            </p>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <h5>SPNs:</h5>
+                                            <p class="mb-1">
+                                                <asp:Label ID="gmsaSPNs" runat="server"></asp:Label>
+                                            </p>
+                                            <small class="text-muted">i.e. HTTP/GMSAName & HTTP/GMSANAME.FQDN</small>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <h5>UserAccount Control:</h5>
+                                            <p class="mb-1">
+                                                <asp:Label ID="gmsaAccountControl" runat="server"></asp:Label>
+                                            </p>
+                                            <ul>
+                                                <li><small class="text-muted">NORMAL_ACCOUNT = 512</small></li>
+                                                <li><small class="text-muted">INTERDOMAIN_TRUST_ACCOUNT = 2048</small></li>
+                                                <li><small class="text-muted">WORKSTATION_TRUST_ACCOUNT = 4096</small></li>
+                                                <li><small class="text-muted">TRUSTED_FOR_DELEGATION = 524288</small></li>
+                                                <li><small class="text-muted">TRUSTED_TO_AUTH_FOR_DELEGATION = 16777216</small></li>
+                                            </ul>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <h5>ms-AllowedToDelegateTo:</h5>
+                                            <p class="mb-1">
+                                                <asp:Label ID="gmsaDelegationInfo" runat="server"></asp:Label>
+                                            </p>
+                                            <small class="text-muted">i.e. LDAP/DCNAME.FQDN, MSSQLSvc/SQL.FQDN:1433</small>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
                                 </div>
                             </div>
                         </div>
