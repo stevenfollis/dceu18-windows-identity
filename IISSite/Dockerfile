@@ -5,8 +5,8 @@
 # https://blogs.msdn.microsoft.com/dotnet/2018/06/13/using-net-and-docker-together-dockercon-2018-update/
 # ================================================================================================
 
-#FROM microsoft/dotnet-framework:4.7.2-sdk-windowsservercore-ltsc2016 as builder
-FROM microsoft/dotnet-framework:4.7.2-sdk-windowsservercore-1803 as builder
+FROM microsoft/dotnet-framework:4.7.2-sdk-windowsservercore-ltsc2016 as builder
+#FROM microsoft/dotnet-framework:4.7.2-sdk-windowsservercore-1803 as builder
 
 WORKDIR C:\site
 
@@ -24,8 +24,8 @@ RUN msbuild `
 # Runtime Stage
 # ================================================================================================
 
-#FROM microsoft/aspnet:4.7.2-windowsservercore-ltsc2016
-FROM microsoft/aspnet:4.7.2-windowsservercore-1803
+FROM microsoft/aspnet:4.7.2-windowsservercore-ltsc2016
+#FROM microsoft/aspnet:4.7.2-windowsservercore-1803
 
 EXPOSE 80
 
@@ -107,7 +107,11 @@ RUN New-WebApplication `
 		-Filter "/system.webServer/security/authentication/anonymousAuthentication" `
 		-Name "Enabled" `
 		-Value $True; `
-		
+
+	Remove-WebConfigurationLock `
+		-Filter "system.webServer/security/Authentication/windowsAuthentication" `
+		-Force `
+				
 	Set-WebConfigurationProperty `
 		-Location "Site/Secure/IWA" `
 		-PSPath IIS:\ `
