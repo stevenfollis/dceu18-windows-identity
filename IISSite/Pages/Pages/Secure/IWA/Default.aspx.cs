@@ -62,8 +62,10 @@ namespace IISSite.Pages.Secure.IWA
         protected global::System.Web.UI.WebControls.Repeater directoryList;
         protected global::System.Web.UI.WebControls.Repeater fileList;
         protected global::System.Web.UI.WebControls.Panel GMSAInfoErrorPanel;
+        protected global::System.Web.UI.WebControls.Panel gmsaResultsPanel;
         protected global::System.Web.UI.WebControls.Label GMSAInfoError;
-        protected global::System.Web.UI.WebControls.Label gmsaName;
+        protected global::System.Web.UI.WebControls.TextBox gmsaName;
+        protected global::System.Web.UI.WebControls.Label gmsaSamAccountName;
         protected global::System.Web.UI.WebControls.Label gmsaSPNs;
         protected global::System.Web.UI.WebControls.Label gmsaAccountControl;
         protected global::System.Web.UI.WebControls.Label gmsaDelegationInfo;
@@ -81,18 +83,19 @@ namespace IISSite.Pages.Secure.IWA
                 BindClaimsTab();
                 BindGroupsTab();
                 BindImpersonationOptions();
-                BindGmsaInfo();
             }
         }
 
-        private void BindGmsaInfo()
+        private void BindGmsaInfo(ADUser gmsa)
         {
-            ADUser gmsa = GetGmsaInfo();
-            gmsaName.Text = gmsa.SamAccountName;
-            gmsaSPNs.Text = gmsa.ServicePrincipalNames;
-            gmsaAccountControl.Text = gmsa.UserAccountControl;
-            gmsaDelegationInfo.Text = gmsa.AllowedToDelegateTo;
-            gmsaSid.Text = gmsa.Sid.ToString();
+            if (gmsa != null)
+            {
+                gmsaSamAccountName.Text = gmsa?.SamAccountName;
+                gmsaSPNs.Text = gmsa?.ServicePrincipalNames;
+                gmsaAccountControl.Text = gmsa?.UserAccountControl;
+                gmsaDelegationInfo.Text = gmsa?.AllowedToDelegateTo;
+                gmsaSid.Text = gmsa?.Sid.ToString();
+            }
         }
 
         private void BindImpersonationOptions()
@@ -337,6 +340,7 @@ namespace IISSite.Pages.Secure.IWA
             dataResultsGrid.DataSource = null;
             dataResultsPanel.Visible = false;
             fileResultsPanel.Visible = false;
+            gmsaResultsPanel.Visible = false;
         }
 
         private void BindFolders(FileShareItem rootFileShareItem)
@@ -596,16 +600,50 @@ namespace IISSite.Pages.Secure.IWA
             breadcrumbLinks.DataBind();
         }
 
-        protected ADUser GetGmsaInfo()
+        protected void GetGmsaData_Click(object sender, EventArgs e)
         {
-            string currentUser = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+            ClearResultPanels();
+
+            try
+            {
+                string gmsaUserName = gmsaName.Text;
+                if (!gmsaUserName.EndsWith("$"))
+                {
+                    gmsaUserName = gmsaUserName + "$";
+                }
+                resultsMessages.Items.Add($"GetGmsaData_Click::Getting gmsa data for {gmsaUserName}");
+
+                ADUser gmsaUser = GetGmsaInfo(gmsaUserName);
+                if (gmsaUser != null)
+                {
+                    BindGmsaInfo(gmsaUser);
+                    resultsMessages.Items.Add($"GetGmsaData_Click::Binding gmsa data for GMSA SID:{gmsaUser.Sid}");
+                    gmsaResultsPanel.Visible = true;
+                }
+                else
+                {
+                    resultsMessages.Items.Add($"GetGmsaData_Click::GMSA {gmsaUserName} not found");
+                }
+            }
+            catch (Exception ex)
+            {
+                ToggleMessage($"GetGmsaData_Click::Error::{ex.ToString()}", true, true);
+            }
+            finally
+            {
+                resultsMessagePanel.Visible = true;
+            }
+        }
+
+        protected ADUser GetGmsaInfo(string GmsaName)
+        {
             SearchResultCollection searchResults = null;
             ADUser gmsaUser = null;
             // set up domain context
             PrincipalContext ctx = new PrincipalContext(ContextType.Domain);
 
             // find a user
-            Principal user = Principal.FindByIdentity(ctx, currentUser);
+            Principal user = Principal.FindByIdentity(ctx, GmsaName);
 
             if (user != null)
             {
@@ -628,7 +666,7 @@ namespace IISSite.Pages.Secure.IWA
                 searcher.Filter = userSearchString;
                 resultsMessages.Items.Add($"LdapBind_Click::Setting filter for for users using filter [{searcher.Filter}]");
                 searchResults = searcher.FindAll();
-                if (searchResults.Count ==1)
+                if (searchResults.Count == 1)
                 {
                     SearchResult result = searchResults[0];
                     //Fill out the rest of the user infor
@@ -648,7 +686,7 @@ namespace IISSite.Pages.Secure.IWA
         private string ParseProp(ResultPropertyValueCollection resultPropertyValueCollection)
         {
             StringBuilder stringBuilder = new StringBuilder();
-            foreach(var r in resultPropertyValueCollection)
+            foreach (var r in resultPropertyValueCollection)
             {
                 stringBuilder.AppendFormat("[{0}] ", r.ToString());
             }
@@ -664,8 +702,6 @@ namespace IISSite.Pages.Secure.IWA
             SearchResultCollection searchResults = null;
             string userSearchString = $"(&(objectCategory=user)(objectClass=user)(|(sAMAccountlName= **{searchString}**)(userPrincipalName=**{searchString}**)))";
             string groupSeachString = $"(&(objectCategory=group)(objectClass=group)(|(name=**{searchString}**)(displayName=**{searchString}**)))";
-
-            ADUser gmsa = GetGmsaInfo();
 
             resultsMessages.Items.Add($"LdapBind_Click::Searching {fqdnToSearch} for {searchString}");
 
@@ -963,7 +999,7 @@ namespace IISSite.Pages.Secure.IWA
                             try
                             {
                                 msMq = MsmqHelper.GetOrCreateQueue(msmqMachineName.Text, msmqQueueName.Text, true, out queMsgs, true, true);
-                                
+
                                 //Add any messages from the call for debugging
                                 foreach (string s in queMsgs)
                                 {
