@@ -1098,6 +1098,11 @@ namespace IISSite.Pages.Secure.IWA
                             }
                             catch (Exception ex)
                             {
+                                //Add any messages from the call for debugging
+                                foreach (string s in queMsgs)
+                                {
+                                    ErrorMessages.Add(s);
+                                }
                                 ErrorMessages.Add($"MsmqQueueSendMessage_Click::Error {ex.ToString()}");
                             }
                             finally
@@ -1140,21 +1145,41 @@ namespace IISSite.Pages.Secure.IWA
             }
             catch (System.Security.SecurityException)
             {
+                //Add any messages from the call for debugging
+                foreach (string s in queMsgs)
+                {
+                    ErrorMessages.Add(s);
+                }
                 ErrorMessages.Add("ERROR Security exception");
                 ToggleMessage("MsmqQueueSendMessage_Click::Error SecurityException", true, true);
             }
             catch (System.UnauthorizedAccessException)
             {
+                //Add any messages from the call for debugging
+                foreach (string s in queMsgs)
+                {
+                    ErrorMessages.Add(s);
+                }
                 ErrorMessages.Add("ERROR Unauthorized exception");
                 ToggleMessage("MsmqQueueSendMessage_Click::Error Unauthorized", true, true);
             }
             catch (MessageQueueException ee)
             {
+                //Add any messages from the call for debugging
+                foreach (string s in queMsgs)
+                {
+                    ErrorMessages.Add(s);
+                }
                 ErrorMessages.Add("MsmqQueueSendMessage_Click::ERROR MessageQueue");
                 ToggleMessage($"MsmqQueueSendMessage_Click::ERROR {ee.ToString()}", true, true);
             }
             catch (Exception eee)
             {
+                //Add any messages from the call for debugging
+                foreach (string s in queMsgs)
+                {
+                    ErrorMessages.Add(s);
+                }
                 ErrorMessages.Add("MsmqQueueSendMessage_Click::ERROR");
                 ToggleMessage($"MsmqQueueSendMessage_Click::ERROR {eee.ToString()}", true, true);
             }
