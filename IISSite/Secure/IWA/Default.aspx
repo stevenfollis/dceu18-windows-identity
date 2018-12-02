@@ -117,8 +117,9 @@
                                     <label for="msmqQueueMsg">Message</label>
                                     <asp:TextBox ID="msmqQueueMsg" CssClass="form-control ms-uppercase" runat="server"></asp:TextBox>
                                 </div>
-                                <asp:Button ID="msmqQueueSendMessage" OnClick="MsmqQueueSendMessage_Click" Text="Send Message" runat="server" CssClass="btn btn-primary" />
-                                <asp:Button ID="msmqQueueReadMessage" OnClick="MsmqQueueReadMessage_Click" Text="Read Message" runat="server" CssClass="btn btn-primary" />
+                                <asp:Button ID="msmqQueueGetMessages" OnClick="MsmqQueueGetMessages_Click" Text="Get Messages" runat="server" CssClass="btn btn-primary" />
+                                <asp:Button ID="msmqQueueSendMessage" OnClick="MsmqQueueSendMessage_Click" Text="Send 1" runat="server" CssClass="btn btn-primary" />
+                                <asp:Button ID="msmqQueueReadMessage" OnClick="MsmqQueueReadMessage_Click" Text="Pop 1" runat="server" CssClass="btn btn-primary" />
                             </div>
                         </div>
                     </div>
@@ -177,8 +178,36 @@
                     <asp:UpdatePanel runat="server" RenderMode="Inline" UpdateMode="Conditional" ValidateRequestMode="Disabled">
                         <ContentTemplate>
                             <div class="card-header">
-                                <asp:Panel ID="resultsMessagePanel" CssClass="alert alert-success" runat="server" Visible="false">
-                                    <asp:ListBox ID="resultsMessages" CssClass="custom-select" runat="server" size="3"></asp:ListBox>
+                                <asp:Panel ID="resultsMessagePanel" runat="server" Visible="false">
+                                    <asp:Repeater ID="resultsMessages" runat="server">
+                                        <HeaderTemplate>
+                                            <div class="accordion" id="errorMessages">
+                                                <div class="card">
+                                                    <div class="card-header" id="messages">
+                                                        <h5 class="mb-0">
+                                                            <button class="btn btn-info" type="button" data-toggle="collapse" data-target="#messageGrid" aria-expanded="true" aria-controls="messageGrid">
+                                                                Show log messages
+                                                            </button>
+                                                        </h5>
+                                                    </div>
+                                                    <div id="messageGrid" class="collapse" aria-labelledby="messages" data-parent="#errorMessages">
+                                                        <div class="card-body">
+                                                            <ul class="list-group">
+                                        </HeaderTemplate>
+                                        <ItemTemplate>
+                                            <li class="list-group-item"><%# Container.DataItem %></li>
+                                        </ItemTemplate>
+                                        <AlternatingItemTemplate>
+                                            <li class="list-group-item list-group-item-secondary"><%# Container.DataItem %></li>
+                                        </AlternatingItemTemplate>
+                                        <FooterTemplate>
+                                            </ul>
+                                                </div>
+                                              </div>
+                                                </div>
+                                                </div>
+                                        </FooterTemplate>
+                                    </asp:Repeater>
                                 </asp:Panel>
                                 <asp:Panel ID="resultsErrorMessagePanel" CssClass="alert alert-danger" runat="server" Visible="false">
                                     <asp:Label ID="resultsErrorMessage" runat="server" Visible="false"></asp:Label>
