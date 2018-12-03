@@ -350,6 +350,8 @@ namespace IISSite.Pages.Secure.IWA
             resultsMessagePanel.Visible = false;
             dataResultsGrid.DataSource = null;
             dataResultsPanel.Visible = false;
+            fileShareList.DataSource = null;
+            directoryList.DataSource = null;
             fileResultsPanel.Visible = false;
             gmsaResultsPanel.Visible = false;
         }
