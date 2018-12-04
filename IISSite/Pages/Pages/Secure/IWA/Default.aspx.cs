@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Messaging;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
@@ -41,7 +42,7 @@ namespace IISSite.Pages.Secure.IWA
         protected global::System.Web.UI.WebControls.TextBox dbServerName;
         protected global::System.Web.UI.WebControls.TextBox dbDatabaseName;
         protected global::System.Web.UI.WebControls.TextBox dbQuery;
-        protected global::System.Web.UI.WebControls.Button GetData;
+        protected global::System.Web.UI.WebControls.Button etGetData;
         protected global::System.Web.UI.WebControls.TextBox ldapDomainname;
         protected global::System.Web.UI.WebControls.TextBox ldapSearchString;
         protected global::System.Web.UI.WebControls.RadioButtonList ldapUsersOrGroups;
@@ -81,7 +82,6 @@ namespace IISSite.Pages.Secure.IWA
 
             if (!Page.IsPostBack)
             {
-                //ShowData.Attributes["class"] = "btn btn-link collapsed";
                 BindUserData();
                 BindClaimsTab();
                 BindGroupsTab();
@@ -118,6 +118,9 @@ namespace IISSite.Pages.Secure.IWA
 
             backendCallType.Items.Add(gmsaListItem);
             backendCallType.Items.Add(userListItem);
+
+            //Set the GMSA name to the machine name
+            gmsaName.Text = Server.MachineName;
         }
 
         protected void BindClaimsTab()
@@ -350,6 +353,8 @@ namespace IISSite.Pages.Secure.IWA
             resultsMessagePanel.Visible = false;
             dataResultsGrid.DataSource = null;
             dataResultsPanel.Visible = false;
+            fileShareList.DataSource = null;
+            directoryList.DataSource = null;
             fileResultsPanel.Visible = false;
             gmsaResultsPanel.Visible = false;
         }
@@ -628,6 +633,8 @@ namespace IISSite.Pages.Secure.IWA
                 if (gmsaUser != null)
                 {
                     BindGmsaInfo(gmsaUser);
+                    ErrorMessages.Add("GetGmsaData_Click::Getting gmsa info for domain");
+                    TestDomainConnectivity();
                     ErrorMessages.Add($"GetGmsaData_Click::Binding gmsa data for GMSA SID:{gmsaUser.Sid}");
                     gmsaResultsPanel.Visible = true;
                 }
@@ -644,6 +651,35 @@ namespace IISSite.Pages.Secure.IWA
             {
                 ShowResultMessages();             
             }
+        }
+
+        private void TestDomainConnectivity()
+        {
+            //Server.MachineNam
+            String sSiteName;
+            //[System.DirectoryServices.ActiveDirectory.ActiveDirectorySite]::GetComputerSite()
+
+            if (DsGetSiteName(
+                    Server.MachineName,//ComputerName
+                    out IntPtr pSiteInfo) == ERROR_SUCCESS)
+            {
+                sSiteName = Marshal.PtrToStringAuto(pSiteInfo);
+                NetApiBufferFree(pSiteInfo);
+                ErrorMessages.Add($"Found workstaton's site Name: {sSiteName}");
+            }
+        }
+
+        [DllImport("netapi32.dll", CharSet = CharSet.Auto)]
+        private static extern int DsGetSiteName(string ComputerName, out IntPtr SiteName);
+
+        [DllImport("Netapi32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
+        public static extern int NetApiBufferFree(IntPtr dwBuffer);
+
+        private const int ERROR_SUCCESS = 0;
+
+        static void Main(string[] args)
+        {
+            
         }
 
         protected ADUser GetGmsaInfo(string GmsaName)

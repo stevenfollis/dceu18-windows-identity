@@ -37,7 +37,8 @@ RUN Import-Module "WebAdministration"; `
 
 	#Install-WindowsFeature "MSMQ";	
 RUN Import-Module "ServerManager"; `
-	Enable-WindowsOptionalFeature -FeatureName "MSMQ" -Online -NoRestart;
+	Enable-WindowsOptionalFeature -FeatureName "MSMQ" -Online -NoRestart; `
+	Enable-WindowsOptionalFeature -FeatureName "MSMQ-Services" -Online -NoRestart;
 
 # Enable IIS Remote Administration
 RUN net user localadmin Qwerty123456 /add; `
