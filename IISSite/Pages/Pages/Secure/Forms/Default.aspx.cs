@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
@@ -23,7 +24,7 @@ namespace IISSite.Pages.Secure.Forms
         protected global::System.Web.UI.WebControls.Label winPrincipalTabError;
         protected global::System.Web.UI.WebControls.Panel winPrincipalTabErrorPanel;
         protected global::System.Web.UI.WebControls.DataGrid userGroupsGrid;
-        protected global::System.Web.UI.WebControls.ListBox resultsMessages;
+        protected global::System.Web.UI.WebControls.Repeater resultsMessages;
         protected global::System.Web.UI.WebControls.Panel resultsMessagePanel;
         protected global::System.Web.UI.WebControls.Panel resultsErrorMessagePanel;
         protected global::System.Web.UI.WebControls.Panel dataResultsPanel;
@@ -36,11 +37,12 @@ namespace IISSite.Pages.Secure.Forms
         protected global::System.Web.UI.WebControls.Button GetData;
         #endregion
 
+        public StringCollection ErrorMessages { get; set; }
+
         protected override void OnLoad(EventArgs e)
         {
             if (!Page.IsPostBack)
             {
-                //ShowData.Attributes["class"] = "btn btn-link collapsed";
                 BindUserData();
                 BindClaimsTab();
                 BindGroupsTab();
@@ -113,6 +115,13 @@ namespace IISSite.Pages.Secure.Forms
             resultsErrorMessagePanel.Visible = isError;
         }
 
+        private void ShowResultMessages()
+        {
+            resultsMessages.DataSource = ErrorMessages;
+            resultsMessages.DataBind();
+            resultsMessagePanel.Visible = true;
+        }
+
         protected void GetSQLData_Click(object sender, EventArgs e)
         {
             ClearResultPanels();
@@ -126,7 +135,7 @@ namespace IISSite.Pages.Secure.Forms
                 TrustServerCertificate = true
             };
 
-            resultsMessages.Items.Add($"Connecting to [{sqlConnectionString.ToString()}]");
+            ErrorMessages.Add($"GetSQLData_Click::Connecting to [{sqlConnectionString.ToString()}]");
 
             try
             {
@@ -138,14 +147,15 @@ namespace IISSite.Pages.Secure.Forms
 
                 // Run the SQL statement, and then get the returned rows to the DataReader.
                 dbConnection = new SqlConnection(sqlConnectionString.ToString());
-                resultsMessages.Items.Add("Opening DB");
+                ErrorMessages.Add("GetSQLData_Click::Opening DB");
                 dbConnection.Open();
                 dataadapter = new SqlDataAdapter(sqlQuery, dbConnection);
-                resultsMessages.Items.Add("Fetching data");
+                ErrorMessages.Add("GetSQLData_Click::Fetching data");
                 dataadapter.Fill(ds, "data");
 
                 if (ds != null)
                 {
+                    ErrorMessages.Add("GetSQLData_Click::Binding data");
                     dataResultsGrid.DataSource = ds.Tables["data"].DefaultView;
                     dataResultsGrid.DataBind();
                     dataResultsPanel.Visible = true;
@@ -154,7 +164,6 @@ namespace IISSite.Pages.Secure.Forms
             catch (Exception sqlex)
             {
                 ToggleMessage($"GetSQLData_Click::{sqlex.ToString()}", true, true);
-                resultsMessagePanel.Visible = false;
             }
             finally
             {
@@ -162,19 +171,22 @@ namespace IISSite.Pages.Secure.Forms
                 {
                     if (dbConnection.State == ConnectionState.Open)
                     {
+                        ErrorMessages.Add("GetSQLData_Click::Closing database");
+
                         dbConnection.Close();
                     }
                 }
-                resultsMessagePanel.Visible = true;
+                ShowResultMessages();
             }
         }
 
         private void ClearResultPanels()
         {
             ToggleMessage("", false, false);
-            resultsMessages.Items.Clear();
+            resultsMessages.DataSource = null;
             resultsMessagePanel.Visible = false;
             dataResultsPanel.Visible = false;
+            ErrorMessages = new StringCollection();
         }
     }
 }

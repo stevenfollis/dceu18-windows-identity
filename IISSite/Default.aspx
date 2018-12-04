@@ -24,13 +24,12 @@
     <form runat="server">
         <asp:ScriptManager runat="server"></asp:ScriptManager>
 
-        <section class="jumbotron jumbotron-fluid" style="background-image: url('/content/sagrada.jpg')">
+        <section class="jumbotron jumbotron-fluid" style="background-image: url('/content/sagrada.jpg');background-repeat: no-repeat; background-size: cover;">
             <div class="container">
                 <h1 class="display-4 text-white text-center">Hello from <%= Server.MachineName %></h1>
                 <div class="h-25 d-inline-block"></div>
             </div>
         </section>
-
         <div class="container-fluid">
              <div class="card-deck">
                 <div class="card border-primary">
@@ -47,7 +46,6 @@
                         <a class="btn btn-primary" href="/">GO</a>
                     </div>
                 </div>
-
                 <div class="card border-success">
                     <h4 class="card-header bg-success text-white">Forms</h4>
                     <div class="card-body">
@@ -62,8 +60,6 @@
                         <a class="btn btn-primary" href="/secure/forms">GO</a>
                     </div>
                 </div>
-
-            
                 <div class="card border-info">
                     <h4 class="card-header bg-info text-white">IWA</h4>
                     <div class="card-body">
@@ -78,8 +74,6 @@
                         <a class="btn btn-primary" href="/secure/iwa">GO</a>
                     </div>
                 </div>
-
-      
                 <div class="card border-danger">
                     <h4 class="card-header bg-danger text-white">IWA+Delgation</h4>
                     <div class="card-body">
@@ -95,7 +89,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </form>
 </asp:Content>
